@@ -17,13 +17,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        if (isTv()) {
-            // TV: 直接进设置页
-            startActivity(Intent(this, SettingsActivity::class.java))
-            finish()
-            return
-        }
-
+        // TV 和手机都显示主页，不再跳转。TV 用 D-pad 焦点导航。
         setContentView(R.layout.activity_main)
 
         // 处理状态栏 insets，给 toolbar 加顶部 padding
@@ -51,11 +45,19 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(Settings.ACTION_SETTINGS))
             }
         }
+
+        // TV: 给所有卡片设置焦点导航；进入页面时默认聚焦第一个卡片
+        val cardStatus = findViewById<View>(R.id.cardStatus)
+        val cardPreview = findViewById<View>(R.id.cardPreview)
+        val cardSettings = findViewById<View>(R.id.cardSettings)
+        val cardDreamSettings = findViewById<View>(R.id.cardDreamSettings)
+        FocusHelper.setupFocusAll(cardStatus, cardPreview, cardSettings, cardDreamSettings)
+        FocusHelper.requestInitialFocus(cardStatus)
     }
 
     override fun onResume() {
         super.onResume()
-        if (!isTv()) refreshStatus()
+        refreshStatus()
     }
 
     private fun refreshStatus() {
@@ -72,7 +74,4 @@ class MainActivity : AppCompatActivity() {
             desc.text = url
         }
     }
-
-    private fun isTv(): Boolean =
-        packageManager.hasSystemFeature("android.software.leanback")
 }

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    默认尺寸（手机端）。大屏用 values-w820dp/dimens.xml 覆盖。
+-->
+<resources>
+    <!-- 主页 Hero -->
+    <dimen name="hero_title_size">36sp</dimen>
+    <dimen name="hero_subtitle_size">14sp</dimen>
+    <dimen name="hero_padding_top">8dp</dimen>
+    <dimen name="hero_padding_bottom">28dp</dimen>
+
+    <!-- 卡片 -->
+    <dimen name="card_padding">22dp</dimen>
+    <dimen name="card_margin_bottom">14dp</dimen>
+    <dimen name="card_title_size">16sp</dimen>
+    <dimen name="card_desc_size">12sp</dimen>
+    <dimen name="card_status_title_size">13sp</dimen>
+    <dimen name="card_status_desc_size">15sp</dimen>
+    <dimen name="card_arrow_size">24sp</dimen>
+
+    <!-- 容器 -->
+    <dimen name="content_padding_h">20dp</dimen>
+    <dimen name="content_max_width">0dp</dimen>
+
+    <!-- 设置页 -->
+    <dimen name="settings_row_padding">22dp</dimen>
+    <dimen name="settings_row_title_size">16sp</dimen>
+    <dimen name="settings_row_summary_size">13sp</dimen>
+    <dimen name="settings_section_label_size">12sp</dimen>
+    <dimen name="settings_about_size">11sp</dimen>
+
+    <!-- Toolbar -->
+    <dimen name="toolbar_height">56dp</dimen>
+</resources>

@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
@@ -101,5 +102,20 @@ class PhonePreviewActivity : AppCompatActivity() {
             return true
         }
         return super.onTouchEvent(event)
+    }
+
+    /**
+     * TV 遥控器：按 OK / BACK / DPAD_CENTER 任一键退出预览。
+     */
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        return when (keyCode) {
+            KeyEvent.KEYCODE_DPAD_CENTER,
+            KeyEvent.KEYCODE_ENTER,
+            KeyEvent.KEYCODE_BACK -> {
+                finish()
+                true
+            }
+            else -> super.onKeyDown(keyCode, event)
+        }
     }
 }

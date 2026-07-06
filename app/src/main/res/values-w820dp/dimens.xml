@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    TV / 大屏专属尺寸：宽度 >= 820dp（约 6.5" 以上的大屏设备）启用。
+    间距、字号、卡片内边距都放大，让电视 3 米外可读。
+-->
+<resources>
+    <!-- 主页 Hero -->
+    <dimen name="hero_title_size">64sp</dimen>
+    <dimen name="hero_subtitle_size">22sp</dimen>
+    <dimen name="hero_padding_top">24dp</dimen>
+    <dimen name="hero_padding_bottom">48dp</dimen>
+
+    <!-- 卡片 -->
+    <dimen name="card_padding">32dp</dimen>
+    <dimen name="card_margin_bottom">20dp</dimen>
+    <dimen name="card_title_size">22sp</dimen>
+    <dimen name="card_desc_size">16sp</dimen>
+    <dimen name="card_status_title_size">18sp</dimen>
+    <dimen name="card_status_desc_size">20sp</dimen>
+    <dimen name="card_arrow_size">32sp</dimen>
+
+    <!-- 容器水平内边距：大屏更宽，左右留白更多，但内容最大宽度限制 -->
+    <dimen name="content_padding_h">64dp</dimen>
+    <dimen name="content_max_width">900dp</dimen>
+
+    <!-- 设置页 -->
+    <dimen name="settings_row_padding">28dp</dimen>
+    <dimen name="settings_row_title_size">20sp</dimen>
+    <dimen name="settings_row_summary_size">15sp</dimen>
+    <dimen name="settings_section_label_size">14sp</dimen>
+    <dimen name="settings_about_size">13sp</dimen>
+
+    <!-- Toolbar -->
+    <dimen name="toolbar_height">72dp</dimen>
+</resources>

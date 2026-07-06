@@ -71,31 +71,61 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun bindRows() {
         // 主题模式
-        findViewById<View>(R.id.rowThemeMode).setOnClickListener { showThemeModeDialog() }
+        findViewById<View>(R.id.rowThemeMode).also {
+            it.setOnClickListener { showThemeModeDialog() }
+            FocusHelper.setupFocus(it)
+        }
         // 图床类型
-        findViewById<View>(R.id.rowSourceMode).setOnClickListener { showSourceModeDialog() }
+        findViewById<View>(R.id.rowSourceMode).also {
+            it.setOnClickListener { showSourceModeDialog() }
+            FocusHelper.setupFocus(it)
+        }
         // 图床 URL
-        findViewById<View>(R.id.rowImageUrl).setOnClickListener { showUrlDialog() }
+        findViewById<View>(R.id.rowImageUrl).also {
+            it.setOnClickListener { showUrlDialog() }
+            FocusHelper.setupFocus(it)
+        }
         // 切换间隔
-        findViewById<View>(R.id.rowInterval).setOnClickListener { showIntervalDialog() }
+        findViewById<View>(R.id.rowInterval).also {
+            it.setOnClickListener { showIntervalDialog() }
+            FocusHelper.setupFocus(it)
+        }
         // 随机顺序：点击卡片切换开关
-        findViewById<View>(R.id.rowRandom).setOnClickListener {
-            val cur = Prefs.randomOrder(this)
-            Prefs.setRandomOrder(this, !cur)
-            refreshUi()
+        findViewById<View>(R.id.rowRandom).also {
+            it.setOnClickListener {
+                val cur = Prefs.randomOrder(this)
+                Prefs.setRandomOrder(this, !cur)
+                refreshUi()
+            }
+            FocusHelper.setupFocus(it)
         }
         // Ken Burns
-        findViewById<View>(R.id.rowKenBurns).setOnClickListener {
-            val cur = Prefs.kenBurns(this)
-            Prefs.setKenBurns(this, !cur)
-            refreshUi()
+        findViewById<View>(R.id.rowKenBurns).also {
+            it.setOnClickListener {
+                val cur = Prefs.kenBurns(this)
+                Prefs.setKenBurns(this, !cur)
+                refreshUi()
+            }
+            FocusHelper.setupFocus(it)
         }
         // 测试连通性
-        findViewById<View>(R.id.rowTest).setOnClickListener { doTest() }
+        findViewById<View>(R.id.rowTest).also {
+            it.setOnClickListener { doTest() }
+            FocusHelper.setupFocus(it)
+        }
         // 系统屏保设置
-        findViewById<View>(R.id.rowDreamSettings).setOnClickListener { openDreamSettings() }
+        findViewById<View>(R.id.rowDreamSettings).also {
+            it.setOnClickListener { openDreamSettings() }
+            FocusHelper.setupFocus(it)
+        }
         // 检查更新
-        findViewById<View>(R.id.rowCheckUpdate).setOnClickListener { checkUpdate() }
+        findViewById<View>(R.id.rowCheckUpdate).also {
+            it.setOnClickListener { checkUpdate() }
+            FocusHelper.setupFocus(it)
+        }
+
+        // TV 进入设置页时，默认聚焦到第一个 row（让遥控器有起点）
+        FocusHelper.requestInitialFocus(findViewById(R.id.rowThemeMode))
     }
 
     /** 刷新所有行的显示状态。 */

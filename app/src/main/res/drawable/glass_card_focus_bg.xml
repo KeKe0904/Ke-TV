@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    TV 焦点态背景：明显的发光描边，让用户在 3 米外也能看清当前焦点。
+    夜间/白天共用，描边色用强调色 accent_blue。
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 外发光：用厚一点的描边模拟 -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/glass_fill_strong" />
+            <stroke
+                android:width="3dp"
+                android:color="@color/accent_blue" />
+            <corners android:radius="28dp" />
+        </shape>
+    </item>
+    <!-- 内层高亮填充 -->
+    <item android:left="3dp" android:right="3dp" android:top="3dp" android:bottom="3dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/glass_fill_strong" />
+            <corners android:radius="26dp" />
+        </shape>
+    </item>
+</layer-list>

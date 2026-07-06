@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    主页布局：手机和大屏共用，所有尺寸用 @dimen 引用。
+    大屏（width >= 820dp）会在 values-w820dp 中覆盖尺寸自动放大。
+    TV 遥控器焦点由 FocusHelper.setupFocus 处理。
+-->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -19,7 +24,7 @@
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="@dimen/toolbar_height"
             android:background="@android:color/transparent"
             android:title="@string/hero_title"
             app:titleTextColor="@color/text_primary" />
@@ -31,248 +36,259 @@
             android:scrollbars="none"
             android:overScrollMode="never">
 
-            <LinearLayout
+            <!-- 居中容器：大屏限制最大宽度，避免内容被拉得过宽 -->
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="20dp"
-                android:paddingBottom="32dp">
+                android:layout_height="wrap_content">
 
-                <!-- Hero 区 -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingHorizontal="8dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="28dp">
+                    android:paddingHorizontal="@dimen/content_padding_h"
+                    android:paddingBottom="32dp"
+                    android:layout_gravity="center_horizontal">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/hero_title"
-                        android:textColor="@color/text_primary"
-                        android:textSize="36sp"
-                        android:fontFamily="sans-serif-thin"
-                        android:letterSpacing="0.02"
-                        android:includeFontPadding="false" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="@string/hero_subtitle"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="14sp"
-                        android:fontFamily="sans-serif-light"
-                        android:letterSpacing="0.08" />
-                </LinearLayout>
-
-                <!-- 状态卡 -->
-                <LinearLayout
-                    android:id="@+id/cardStatus"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:background="@drawable/glass_card_ripple"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:padding="22dp"
-                    android:layout_marginBottom="14dp">
-
+                    <!-- Hero 区 -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-
-                        <View
-                            android:layout_width="10dp"
-                            android:layout_height="10dp"
-                            android:background="@drawable/status_dot" />
+                        android:orientation="vertical"
+                        android:paddingHorizontal="8dp"
+                        android:paddingTop="@dimen/hero_padding_top"
+                        android:paddingBottom="@dimen/hero_padding_bottom">
 
                         <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/hero_title"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/hero_title_size"
+                            android:fontFamily="sans-serif-thin"
+                            android:letterSpacing="0.02"
+                            android:includeFontPadding="false" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:text="@string/hero_subtitle"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/hero_subtitle_size"
+                            android:fontFamily="sans-serif-light"
+                            android:letterSpacing="0.08" />
+                    </LinearLayout>
+
+                    <!-- 状态卡 -->
+                    <LinearLayout
+                        android:id="@+id/cardStatus"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:background="@drawable/glass_card_ripple"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:padding="@dimen/card_padding"
+                        android:layout_marginBottom="@dimen/card_margin_bottom">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <View
+                                android:layout_width="10dp"
+                                android:layout_height="10dp"
+                                android:background="@drawable/status_dot" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="12dp"
+                                android:text="@string/card_status_title"
+                                android:textColor="@color/text_primary"
+                                android:textSize="@dimen/card_status_title_size"
+                                android:fontFamily="sans-serif-medium"
+                                android:letterSpacing="0.06"
+                                android:textAllCaps="true" />
+
+                            <TextView
+                                android:id="@+id/tvStatusBadge"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/card_status_empty"
+                                android:textColor="@color/accent_orange"
+                                android:textSize="@dimen/card_status_title_size"
+                                android:fontFamily="sans-serif-medium" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/tvStatusDesc"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:text="@string/card_status_empty"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/card_status_desc_size"
+                            android:fontFamily="sans-serif-light"
+                            android:maxLines="2"
+                            android:ellipsize="middle" />
+                    </LinearLayout>
+
+                    <!-- 预览屏保 -->
+                    <LinearLayout
+                        android:id="@+id/cardPreview"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:background="@drawable/glass_card_ripple"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:padding="@dimen/card_padding"
+                        android:layout_marginBottom="@dimen/card_margin_bottom"
+                        android:gravity="center_vertical">
+
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginStart="12dp"
-                            android:text="@string/card_status_title"
-                            android:textColor="@color/text_primary"
-                            android:textSize="13sp"
-                            android:fontFamily="sans-serif-medium"
-                            android:letterSpacing="0.06"
-                            android:textAllCaps="true" />
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/card_preview_title"
+                                android:textColor="@color/text_primary"
+                                android:textSize="@dimen/card_title_size"
+                                android:fontFamily="sans-serif-medium" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="3dp"
+                                android:text="@string/card_preview_desc"
+                                android:textColor="@color/text_tertiary"
+                                android:textSize="@dimen/card_desc_size"
+                                android:fontFamily="sans-serif-light" />
+                        </LinearLayout>
 
                         <TextView
-                            android:id="@+id/tvStatusBadge"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/card_status_empty"
-                            android:textColor="@color/accent_orange"
-                            android:textSize="12sp"
-                            android:fontFamily="sans-serif-medium" />
+                            android:text="›"
+                            android:textColor="@color/text_tertiary"
+                            android:textSize="@dimen/card_arrow_size" />
+                    </LinearLayout>
+
+                    <!-- 屏保设置 -->
+                    <LinearLayout
+                        android:id="@+id/cardSettings"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:background="@drawable/glass_card_ripple"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:padding="@dimen/card_padding"
+                        android:layout_marginBottom="@dimen/card_margin_bottom"
+                        android:gravity="center_vertical">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/card_settings_title"
+                                android:textColor="@color/text_primary"
+                                android:textSize="@dimen/card_title_size"
+                                android:fontFamily="sans-serif-medium" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="3dp"
+                                android:text="@string/card_settings_desc"
+                                android:textColor="@color/text_tertiary"
+                                android:textSize="@dimen/card_desc_size"
+                                android:fontFamily="sans-serif-light" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="›"
+                            android:textColor="@color/text_tertiary"
+                            android:textSize="@dimen/card_arrow_size" />
+                    </LinearLayout>
+
+                    <!-- 系统屏保设置 -->
+                    <LinearLayout
+                        android:id="@+id/cardDreamSettings"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:background="@drawable/glass_card_ripple"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:padding="@dimen/card_padding"
+                        android:layout_marginBottom="@dimen/card_margin_bottom"
+                        android:gravity="center_vertical">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/card_dream_settings_title"
+                                android:textColor="@color/text_primary"
+                                android:textSize="@dimen/card_title_size"
+                                android:fontFamily="sans-serif-medium" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="3dp"
+                                android:text="@string/card_dream_settings_desc"
+                                android:textColor="@color/text_tertiary"
+                                android:textSize="@dimen/card_desc_size"
+                                android:fontFamily="sans-serif-light" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="›"
+                            android:textColor="@color/text_tertiary"
+                            android:textSize="@dimen/card_arrow_size" />
                     </LinearLayout>
 
                     <TextView
-                        android:id="@+id/tvStatusDesc"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="@string/card_status_empty"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="15sp"
+                        android:layout_marginTop="20dp"
+                        android:gravity="center"
+                        android:text="@string/about_summary"
+                        android:textColor="@color/text_tertiary"
+                        android:textSize="@dimen/settings_about_size"
                         android:fontFamily="sans-serif-light"
-                        android:maxLines="2"
-                        android:ellipsize="middle" />
+                        android:letterSpacing="0.1" />
+
                 </LinearLayout>
-
-                <!-- 预览屏保 -->
-                <LinearLayout
-                    android:id="@+id/cardPreview"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:background="@drawable/glass_card_ripple"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:padding="22dp"
-                    android:layout_marginBottom="14dp"
-                    android:gravity="center_vertical">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/card_preview_title"
-                            android:textColor="@color/text_primary"
-                            android:textSize="16sp"
-                            android:fontFamily="sans-serif-medium" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="3dp"
-                            android:text="@string/card_preview_desc"
-                            android:textColor="@color/text_tertiary"
-                            android:textSize="12sp"
-                            android:fontFamily="sans-serif-light" />
-                    </LinearLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="›"
-                        android:textColor="@color/text_tertiary"
-                        android:textSize="24sp" />
-                </LinearLayout>
-
-                <!-- 屏保设置 -->
-                <LinearLayout
-                    android:id="@+id/cardSettings"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:background="@drawable/glass_card_ripple"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:padding="22dp"
-                    android:layout_marginBottom="14dp"
-                    android:gravity="center_vertical">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/card_settings_title"
-                            android:textColor="@color/text_primary"
-                            android:textSize="16sp"
-                            android:fontFamily="sans-serif-medium" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="3dp"
-                            android:text="@string/card_settings_desc"
-                            android:textColor="@color/text_tertiary"
-                            android:textSize="12sp"
-                            android:fontFamily="sans-serif-light" />
-                    </LinearLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="›"
-                        android:textColor="@color/text_tertiary"
-                        android:textSize="24sp" />
-                </LinearLayout>
-
-                <!-- 系统屏保设置 -->
-                <LinearLayout
-                    android:id="@+id/cardDreamSettings"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:background="@drawable/glass_card_ripple"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:padding="22dp"
-                    android:layout_marginBottom="14dp"
-                    android:gravity="center_vertical">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/card_dream_settings_title"
-                            android:textColor="@color/text_primary"
-                            android:textSize="16sp"
-                            android:fontFamily="sans-serif-medium" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="3dp"
-                            android:text="@string/card_dream_settings_desc"
-                            android:textColor="@color/text_tertiary"
-                            android:textSize="12sp"
-                            android:fontFamily="sans-serif-light" />
-                    </LinearLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="›"
-                        android:textColor="@color/text_tertiary"
-                        android:textSize="24sp" />
-                </LinearLayout>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:gravity="center"
-                    android:text="@string/about_summary"
-                    android:textColor="@color/text_tertiary"
-                    android:textSize="11sp"
-                    android:fontFamily="sans-serif-light"
-                    android:letterSpacing="0.1" />
-
-            </LinearLayout>
+            </FrameLayout>
         </ScrollView>
     </LinearLayout>
 </FrameLayout>

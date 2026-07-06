@@ -50,7 +50,7 @@
     <string name="update_dialog_later">稍后</string>
     <string name="update_error">检查更新失败：%1$s</string>
 
-    <string name="about_summary">Ke-TV v1.4.2 · 测试版本</string>
+    <string name="about_summary">Ke-TV v1.5.0 · 测试版本</string>
 
     <string name="settings_title">屏保设置</string>
     <string name="test_running">正在测试…</string>
