@@ -16,9 +16,10 @@ import kotlin.math.sin
 /**
  * 液态玻璃背景 View。
  *
- * 4 个彩色光晕在背景上缓慢漂浮，模拟 macOS Sonoma / iOS 流光效果。
- * 背景纯色：系统夜间模式 → 纯黑；白天模式 → 纯白（默认）。
- * 光晕在白底上更柔和、alpha 略低；黑底上更通透。
+ * 设计原则：
+ * 1. 背景必须首先是纯色：夜间纯黑，白天纯白。
+ * 2. 彩色光晕只是极淡的氛围点缀，不能喧宾夺主。
+ * 3. 默认状态下用户应明显看到纯黑/纯白，而非彩色渐变。
  */
 class LiquidBackgroundView @JvmOverloads constructor(
     context: Context,
@@ -27,27 +28,28 @@ class LiquidBackgroundView @JvmOverloads constructor(
 ) : View(context, attrs, defStyle) {
 
     private data class Blob(
-        val baseX: Float,        // 0..1 归一化位置
+        val baseX: Float,
         val baseY: Float,
-        val radiusRatio: Float,  // 相对短边
+        val radiusRatio: Float,
         val color: Int,
         val phase: Float,
-        val driftX: Float,       // 漂浮幅度
+        val driftX: Float,
         val driftY: Float,
         val speed: Float
     )
 
+    /** 光晕位置更靠边、面积更大、移动更慢，存在感极低。 */
     private val blobs = listOf(
-        Blob(0.18f, 0.28f, 0.65f, 0xFF5B8DEF.toInt(), 0.0f, 0.12f, 0.10f, 0.00018f),
-        Blob(0.82f, 0.22f, 0.55f, 0xFFBF5AF2.toInt(), 1.6f, 0.10f, 0.13f, 0.00022f),
-        Blob(0.74f, 0.80f, 0.60f, 0xFFFF375F.toInt(), 3.1f, 0.14f, 0.09f, 0.00020f),
-        Blob(0.26f, 0.78f, 0.52f, 0xFF30D158.toInt(), 4.7f, 0.11f, 0.12f, 0.00025f)
+        Blob(0.10f, 0.15f, 0.90f, 0xFF5B8DEF.toInt(), 0.0f, 0.08f, 0.08f, 0.00012f),
+        Blob(0.90f, 0.12f, 0.80f, 0xFFBF5AF2.toInt(), 2.2f, 0.07f, 0.09f, 0.00014f),
+        Blob(0.85f, 0.88f, 0.85f, 0xFFFF375F.toInt(), 4.1f, 0.09f, 0.07f, 0.00013f),
+        Blob(0.12f, 0.85f, 0.75f, 0xFF30D158.toInt(), 5.7f, 0.08f, 0.08f, 0.00015f)
     )
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private var time = 0f
 
-    /** 强制夜间（黑色背景）。屏保（DreamService）通常设为 true，避免白光刺眼。 */
+    /** 强制夜间（黑色背景）。屏保（DreamService）通常设为 true。 */
     var forceNight: Boolean = false
 
     /** 当前是否为夜间模式：forceNight 优先，否则跟随系统 uiMode。 */
@@ -80,15 +82,16 @@ class LiquidBackgroundView @JvmOverloads constructor(
         super.onDraw(canvas)
         val night = isNight
 
-        // 纯色基底：夜间纯黑，白天纯白
+        // 第一步：铺满纯色基底，这是用户看到的主体背景
         canvas.drawColor(if (night) Color.BLACK else Color.WHITE)
 
         val w = width.toFloat()
         val h = height.toFloat()
         val shortEdge = minOf(w, h)
 
-        // 白底上光晕更柔和（alpha 低），黑底上更通透（alpha 高）
-        val blobAlpha = if (night) 130 else 110
+        // 第二步：在角落画极淡的彩色光晕，alpha 非常低，只是氛围
+        // 夜间 alpha 22，白天 alpha 16，确保不会掩盖纯黑/纯白
+        val blobAlpha = if (night) 22 else 16
         for (b in blobs) {
             val phase = time * b.speed + b.phase
             val cx = (b.baseX + b.driftX * sin(phase * 1.7f).toFloat()) * w
@@ -105,9 +108,9 @@ class LiquidBackgroundView @JvmOverloads constructor(
             canvas.drawRect(0f, 0f, w, h, paint)
         }
 
-        // 顶部一层轻微暗化（夜间）/ 暗化（白天），保证文字对比度
+        // 第三步：顶部叠加一层几乎看不见的暗化/亮化蒙版，保证文字对比度
         paint.shader = null
-        paint.alpha = if (night) 40 else 18
+        paint.alpha = if (night) 12 else 6
         canvas.drawColor(if (night) 0x08000000 else 0x10000000)
     }
 }

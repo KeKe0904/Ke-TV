@@ -2,13 +2,13 @@
 <resources>
     <!-- 液态玻璃配色：默认白天（纯白底） -->
     <color name="bg_base">#FFFFFFFF</color>
-    <color name="glass_fill">#1A000000</color>
-    <color name="glass_fill_strong">#26000000</color>
-    <color name="glass_stroke">#33000000</color>
-    <color name="glass_stroke_strong">#55000000</color>
+    <color name="glass_fill">#0D000000</color>
+    <color name="glass_fill_strong">#1A000000</color>
+    <color name="glass_stroke">#22000000</color>
+    <color name="glass_stroke_strong">#3D000000</color>
 
     <!-- 文字：白天为深色 -->
-    <color name="text_primary">#FF1A1A1A</color>
+    <color name="text_primary">#FF0F0F0F</color>
     <color name="text_secondary">#B3000000</color>
     <color name="text_tertiary">#80000000</color>
 
