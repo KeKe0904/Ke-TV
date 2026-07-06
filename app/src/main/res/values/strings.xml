@@ -38,7 +38,19 @@
     <string name="pref_open_dream_settings_title">打开系统屏保设置</string>
     <string name="pref_open_dream_settings_summary">在这里选择本 APP 作为系统屏保</string>
 
-    <string name="about_summary">Ke-TV v1.4.1 · 测试版本</string>
+    <string name="pref_check_update_title">检查更新</string>
+    <string name="pref_check_update_summary">从 GitHub 获取最新版本（含测试版）</string>
+    <string name="update_checking">正在检查更新…</string>
+    <string name="update_latest">当前已是最新版本</string>
+    <string name="update_available">发现新版本 %1$s</string>
+    <string name="update_prerelease">测试版本</string>
+    <string name="update_dialog_title">发现新版本</string>
+    <string name="update_dialog_message">当前版本：%1$s\n最新版本：%2$s%3$s\n\n是否前往下载？</string>
+    <string name="update_dialog_download">下载</string>
+    <string name="update_dialog_later">稍后</string>
+    <string name="update_error">检查更新失败：%1$s</string>
+
+    <string name="about_summary">Ke-TV v1.4.2 · 测试版本</string>
 
     <string name="settings_title">屏保设置</string>
     <string name="test_running">正在测试…</string>

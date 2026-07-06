@@ -1,6 +1,7 @@
 package com.tvtoolbox.screensaver
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.view.LayoutInflater
@@ -93,6 +94,8 @@ class SettingsActivity : AppCompatActivity() {
         findViewById<View>(R.id.rowTest).setOnClickListener { doTest() }
         // 系统屏保设置
         findViewById<View>(R.id.rowDreamSettings).setOnClickListener { openDreamSettings() }
+        // 检查更新
+        findViewById<View>(R.id.rowCheckUpdate).setOnClickListener { checkUpdate() }
     }
 
     /** 刷新所有行的显示状态。 */
@@ -234,6 +237,64 @@ class SettingsActivity : AppCompatActivity() {
             } catch (_: Throwable) {
                 Toast.makeText(this, "无法打开系统设置", Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    /** 检查 GitHub 最新 Release（含测试版）。 */
+    private fun checkUpdate() {
+        val tvTitle = findViewById<android.widget.TextView>(R.id.tvCheckUpdateTitle)
+        val tvSummary = findViewById<android.widget.TextView>(R.id.tvCheckUpdateSummary)
+        val originalTitle = tvTitle.text
+        val originalSummary = tvSummary.text
+
+        tvTitle.text = getString(R.string.pref_check_update_title)
+        tvSummary.text = getString(R.string.update_checking)
+
+        scope.launch {
+            val result = withContext(Dispatchers.IO) {
+                try {
+                    UpdateChecker.check(this@SettingsActivity)
+                } catch (t: Throwable) {
+                    null
+                }
+            }
+
+            tvTitle.text = originalTitle
+            tvSummary.text = originalSummary
+
+            if (result == null) {
+                Toast.makeText(this@SettingsActivity, getString(R.string.update_error, "网络异常"), Toast.LENGTH_LONG).show()
+                return@launch
+            }
+
+            if (!result.hasUpdate) {
+                Toast.makeText(
+                    this@SettingsActivity,
+                    getString(R.string.update_latest),
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@launch
+            }
+
+            val prereleaseTag = if (result.isPrerelease) " · ${getString(R.string.update_prerelease)}" else ""
+            val message = getString(
+                R.string.update_dialog_message,
+                result.currentVersion,
+                result.latestVersion,
+                prereleaseTag
+            )
+            MaterialAlertDialogBuilder(this@SettingsActivity)
+                .setTitle(R.string.update_dialog_title)
+                .setMessage(message)
+                .setPositiveButton(R.string.update_dialog_download) { _, _ ->
+                    try {
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(result.downloadUrl)))
+                    } catch (_: Throwable) {
+                        Toast.makeText(this@SettingsActivity, "无法打开浏览器", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                .setNegativeButton(R.string.update_dialog_later, null)
+                .show()
         }
     }
 
