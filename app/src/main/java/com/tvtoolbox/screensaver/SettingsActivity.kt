@@ -3,10 +3,13 @@ package com.tvtoolbox.screensaver
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
+import android.view.LayoutInflater
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.materialswitch.MaterialSwitch
+import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -15,10 +18,20 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * 设置宿主 Activity。承载 SettingsFragment。
- * 手机和 TV 都用同一个 fragment，只是宿主样式不同。
+ * 设置页（自定义布局，不再用 PreferenceFragment）。
+ *
+ * 这样做的理由：
+ * 1. EditTextPreference 在某些主题下对话框不弹出（之前的 bug）
+ * 2. 液态玻璃 UI 用 PreferenceFragment 难以定制
+ * 3. 自定义逻辑更可控、更可调试
  */
 class SettingsActivity : AppCompatActivity() {
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
+    // 间隔选项
+    private val intervalEntries by lazy { resources.getStringArray(R.array.interval_entries) }
+    private val intervalValues by lazy { resources.getStringArray(R.array.interval_values) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,12 +42,16 @@ class SettingsActivity : AppCompatActivity() {
             setDisplayHomeAsUpEnabled(true)
             title = getString(R.string.settings_title)
         }
+        // 用自定义返回图标，覆盖默认
+        findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar_settings)
+            .setNavigationOnClickListener { finish() }
 
-        if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, SettingsFragment())
-                .commit()
-        }
+        bindRows()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshUi()
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -42,61 +59,122 @@ class SettingsActivity : AppCompatActivity() {
         return true
     }
 
-    class SettingsFragment : PreferenceFragmentCompat() {
-
-        private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-
-        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-            setPreferencesFromResource(R.xml.preferences, rootKey)
+    private fun bindRows() {
+        // 图床 URL
+        findViewById<View>(R.id.rowImageUrl).setOnClickListener { showUrlDialog() }
+        // 切换间隔
+        findViewById<View>(R.id.rowInterval).setOnClickListener { showIntervalDialog() }
+        // 随机顺序：点击卡片切换开关
+        findViewById<View>(R.id.rowRandom).setOnClickListener {
+            val cur = Prefs.randomOrder(this)
+            Prefs.setRandomOrder(this, !cur)
+            refreshUi()
         }
-
-        override fun onPreferenceTreeClick(preference: Preference): Boolean {
-            when (preference.key) {
-                "test_fetch" -> doTest()
-                "open_dream_settings" -> openDreamSettings()
-            }
-            return super.onPreferenceTreeClick(preference)
+        // Ken Burns
+        findViewById<View>(R.id.rowKenBurns).setOnClickListener {
+            val cur = Prefs.kenBurns(this)
+            Prefs.setKenBurns(this, !cur)
+            refreshUi()
         }
+        // 测试连通性
+        findViewById<View>(R.id.rowTest).setOnClickListener { doTest() }
+        // 系统屏保设置
+        findViewById<View>(R.id.rowDreamSettings).setOnClickListener { openDreamSettings() }
+    }
 
-        private fun doTest() {
-            val url = Prefs.imageUrl(requireContext())
-            if (url.isBlank()) {
-                Toast.makeText(requireContext(), R.string.no_url, Toast.LENGTH_SHORT).show()
-                return
+    /** 刷新所有行的显示状态。 */
+    private fun refreshUi() {
+        // URL
+        val url = Prefs.imageUrl(this)
+        val urlText = if (url.isBlank()) getString(R.string.pref_image_url_summary) else url
+        findViewById<android.widget.TextView>(R.id.tvImageUrlValue).text = urlText
+
+        // 间隔
+        val seconds = Prefs.intervalSeconds(this)
+        val idx = intervalValues.indexOfFirst { it.toIntOrNull() == seconds }
+        val intervalText = if (idx in intervalEntries.indices) intervalEntries[idx] else "${seconds}s"
+        findViewById<android.widget.TextView>(R.id.tvIntervalValue).text = intervalText
+
+        // 开关
+        findViewById<MaterialSwitch>(R.id.switchRandom).isChecked = Prefs.randomOrder(this)
+        findViewById<MaterialSwitch>(R.id.switchKenBurns).isChecked = Prefs.kenBurns(this)
+    }
+
+    /** 图床 URL 输入对话框（修复 v1.1 点击无反应的 bug）。 */
+    private fun showUrlDialog() {
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_url_input, null, false)
+        val et = view.findViewById<TextInputEditText>(R.id.etUrl)
+        et.setText(Prefs.imageUrl(this))
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.dialog_url_title)
+            .setView(view)
+            .setPositiveButton(R.string.dialog_save) { _, _ ->
+                val newUrl = et.text?.toString()?.trim() ?: ""
+                Prefs.setImageUrl(this, newUrl)
+                refreshUi()
+                Toast.makeText(this, R.string.dialog_save, Toast.LENGTH_SHORT).show()
             }
-            val pref = findPreference<Preference>("test_fetch") ?: return
-            val originalTitle = pref.title
-            pref.title = getString(R.string.test_running)
+            .setNegativeButton(R.string.dialog_cancel, null)
+            .show()
+    }
 
-            scope.launch {
-                val msg = withContext(Dispatchers.IO) {
-                    try {
-                        val list = ImageFetcher().fetch(url)
-                        getString(R.string.test_ok, list.size)
-                    } catch (t: Throwable) {
-                        getString(R.string.test_fail, t.message ?: "?")
-                    }
+    /** 切换间隔单选对话框。 */
+    private fun showIntervalDialog() {
+        val cur = Prefs.intervalSeconds(this)
+        val checked = intervalValues.indexOfFirst { it.toIntOrNull() == cur }
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.dialog_interval_title)
+            .setSingleChoiceItems(intervalEntries, checked) { dialog, which ->
+                intervalValues[which].toIntOrNull()?.let { secs ->
+                    Prefs.setIntervalSeconds(this, secs)
+                    refreshUi()
                 }
-                Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
-                pref.title = originalTitle
+                dialog.dismiss()
             }
-        }
+            .setNegativeButton(R.string.dialog_cancel, null)
+            .show()
+    }
 
-        private fun openDreamSettings() {
-            try {
-                startActivity(Intent(Settings.ACTION_DREAM_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            } catch (t: Throwable) {
+    /** 测试图床连通性。 */
+    private fun doTest() {
+        val url = Prefs.imageUrl(this)
+        if (url.isBlank()) {
+            Toast.makeText(this, R.string.no_url, Toast.LENGTH_SHORT).show()
+            return
+        }
+        val tv = findViewById<android.widget.TextView>(R.id.tvTestTitle)
+        val original = tv.text
+        tv.text = getString(R.string.test_running)
+
+        scope.launch {
+            val msg = withContext(Dispatchers.IO) {
                 try {
-                    startActivity(Intent(Settings.ACTION_SETTINGS))
-                } catch (_: Throwable) {
-                    Toast.makeText(requireContext(), "无法打开系统设置", Toast.LENGTH_SHORT).show()
+                    val list = ImageFetcher().fetch(url)
+                    getString(R.string.test_ok, list.size)
+                } catch (t: Throwable) {
+                    getString(R.string.test_fail, t.message ?: "?")
                 }
             }
+            Toast.makeText(this@SettingsActivity, msg, Toast.LENGTH_LONG).show()
+            tv.text = original
         }
+    }
 
-        override fun onDestroy() {
-            super.onDestroy()
-            scope.cancel()
+    private fun openDreamSettings() {
+        try {
+            startActivity(Intent(Settings.ACTION_DREAM_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        } catch (t: Throwable) {
+            try {
+                startActivity(Intent(Settings.ACTION_SETTINGS))
+            } catch (_: Throwable) {
+                Toast.makeText(this, "无法打开系统设置", Toast.LENGTH_SHORT).show()
+            }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        scope.cancel()
     }
 }

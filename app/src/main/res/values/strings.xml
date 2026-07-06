@@ -3,6 +3,7 @@
     <string name="app_name">TV 工具箱</string>
     <string name="dream_label">TV 工具箱屏保</string>
 
+    <!-- 设置项 -->
     <string name="cat_image_source">图床设置</string>
     <string name="cat_actions">操作</string>
     <string name="cat_about">关于</string>
@@ -10,8 +11,10 @@
     <string name="pref_image_url_title">图床 URL</string>
     <string name="pref_image_url_summary">返回 JSON 图片列表的接口地址</string>
     <string name="pref_image_url_dialog">输入图床 URL</string>
+    <string name="pref_image_url_hint">https://example.com/images.json</string>
 
     <string name="pref_interval_title">切换间隔</string>
+    <string name="pref_interval_summary">%s</string>
 
     <string name="pref_random_title">随机顺序</string>
     <string name="pref_random_summary">打乱图片播放顺序</string>
@@ -25,7 +28,7 @@
     <string name="pref_open_dream_settings_title">打开系统屏保设置</string>
     <string name="pref_open_dream_settings_summary">在这里选择本 APP 作为系统屏保</string>
 
-    <string name="about_summary">TV 工具箱 v1.1\n自定义图床屏保</string>
+    <string name="about_summary">TV 工具箱 v1.2 · 自定义图床屏保</string>
 
     <string name="settings_title">屏保设置</string>
     <string name="test_running">正在测试…</string>
@@ -36,14 +39,24 @@
     <string name="empty">没有可显示的图片</string>
 
     <!-- 手机端主页 -->
+    <string name="hero_title">TV 工具箱</string>
+    <string name="hero_subtitle">自定义图床 · 流光屏保</string>
     <string name="card_status_title">图床状态</string>
-    <string name="card_status_empty">尚未配置，点击进入设置</string>
-    <string name="card_status_configured">已配置 · 点击修改</string>
-    <string name="card_preview_title">预览屏保效果</string>
-    <string name="card_preview_desc">全屏播放图片，单击退出</string>
+    <string name="card_status_empty">尚未配置 · 点击设置</string>
+    <string name="card_status_configured">已配置</string>
+    <string name="card_preview_title">预览屏保</string>
+    <string name="card_preview_desc">全屏播放 · 单击退出</string>
     <string name="card_settings_title">屏保设置</string>
-    <string name="card_settings_desc">配置图床 URL、切换间隔、动效等</string>
+    <string name="card_settings_desc">图床 URL · 切换间隔 · 动效</string>
     <string name="card_dream_settings_title">系统屏保设置</string>
     <string name="card_dream_settings_desc">选择本 APP 作为系统屏保</string>
     <string name="preview_hint">单击屏幕退出预览</string>
+
+    <!-- 对话框 -->
+    <string name="dialog_ok">确定</string>
+    <string name="dialog_cancel">取消</string>
+    <string name="dialog_save">保存</string>
+    <string name="dialog_url_title">图床 URL</string>
+    <string name="dialog_url_message">粘贴返回 JSON 图片列表的接口地址</string>
+    <string name="dialog_interval_title">切换间隔</string>
 </resources>

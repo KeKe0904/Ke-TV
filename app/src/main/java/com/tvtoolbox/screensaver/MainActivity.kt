@@ -4,8 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.card.MaterialCardView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -14,34 +14,36 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, true)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         if (isTv()) {
-            // TV: 直接进设置页（保留原有行为）
+            // TV: 直接进设置页
             startActivity(Intent(this, SettingsActivity::class.java))
             finish()
             return
         }
 
-        // 手机: 显示卡片式主页
         setContentView(R.layout.activity_main)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.toolbar)) { v, insets ->
+        // 处理状态栏 insets，给 toolbar 加顶部 padding
+        val toolbar = findViewById<View>(R.id.toolbar)
+        ViewCompat.setOnApplyWindowInsetsListener(toolbar) { v, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(v.paddingLeft, bars.top, v.paddingRight, v.paddingBottom)
             insets
         }
 
-        findViewById<MaterialCardView>(R.id.cardStatus).setOnClickListener {
-            refreshStatus()
-        }
-        findViewById<MaterialCardView>(R.id.cardPreview).setOnClickListener {
-            startActivity(Intent(this, PhonePreviewActivity::class.java))
-        }
-        findViewById<MaterialCardView>(R.id.cardSettings).setOnClickListener {
+        // 卡片点击
+        findViewById<View>(R.id.cardStatus).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
-        findViewById<MaterialCardView>(R.id.cardDreamSettings).setOnClickListener {
+        findViewById<View>(R.id.cardPreview).setOnClickListener {
+            startActivity(Intent(this, PhonePreviewActivity::class.java))
+        }
+        findViewById<View>(R.id.cardSettings).setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+        findViewById<View>(R.id.cardDreamSettings).setOnClickListener {
             try {
                 startActivity(Intent(Settings.ACTION_DREAM_SETTINGS))
             } catch (_: Throwable) {
@@ -57,16 +59,19 @@ class MainActivity : AppCompatActivity() {
 
     private fun refreshStatus() {
         val url = Prefs.imageUrl(this)
-        val desc = if (url.isBlank()) {
-            getString(R.string.card_status_empty)
+        val badge = findViewById<TextView>(R.id.tvStatusBadge)
+        val desc = findViewById<TextView>(R.id.tvStatusDesc)
+        if (url.isBlank()) {
+            badge.text = getString(R.string.card_status_empty)
+            badge.setTextColor(getColor(R.color.accent_orange))
+            desc.text = getString(R.string.card_status_empty)
         } else {
-            getString(R.string.card_status_configured) + "\n" + url
+            badge.text = getString(R.string.card_status_configured)
+            badge.setTextColor(getColor(R.color.accent_green))
+            desc.text = url
         }
-        findViewById<android.widget.TextView>(R.id.tvStatusDesc).text = desc
     }
 
-    /** 判断是否是 TV 设备（leanback feature available）。 */
-    private fun isTv(): Boolean {
-        return packageManager.hasSystemFeature("android.software.leanback")
-    }
+    private fun isTv(): Boolean =
+        packageManager.hasSystemFeature("android.software.leanback")
 }

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingHorizontal="24dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/dialog_url_message"
+        android:textColor="@color/text_secondary"
+        android:textSize="13sp"
+        android:fontFamily="sans-serif-light" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:hint="@string/pref_image_url_hint"
+        app:boxStrokeColor="@color/accent_blue"
+        app:hintTextColor="@color/accent_blue"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etUrl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textUri|textMultiLine"
+            android:maxLines="3"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-light" />
+    </com.google.android.material.textfield.TextInputLayout>
+</LinearLayout>
