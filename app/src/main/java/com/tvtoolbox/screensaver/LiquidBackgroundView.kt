@@ -88,7 +88,7 @@ class LiquidBackgroundView @JvmOverloads constructor(
         val shortEdge = minOf(w, h)
 
         // 白底上光晕更柔和（alpha 低），黑底上更通透（alpha 高）
-        val blobAlpha = if (night) 130 else 95
+        val blobAlpha = if (night) 130 else 110
         for (b in blobs) {
             val phase = time * b.speed + b.phase
             val cx = (b.baseX + b.driftX * sin(phase * 1.7f).toFloat()) * w

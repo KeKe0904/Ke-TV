@@ -25,6 +25,7 @@ class PhonePreviewActivity : AppCompatActivity() {
     private var controller: PhotoSlideshowController? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeHelper.apply(this)
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)

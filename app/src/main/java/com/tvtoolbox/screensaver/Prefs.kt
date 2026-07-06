@@ -39,4 +39,11 @@ object Prefs {
 
     fun setSourceMode(context: Context, value: String) =
         get(context).edit().putString("source_mode", value).apply()
+
+    /** 主题模式：system 跟随系统，light 强制白天，dark 强制夜间。默认 system。 */
+    fun themeMode(context: Context): String =
+        get(context).getString("theme_mode", "system") ?: "system"
+
+    fun setThemeMode(context: Context, value: String) =
+        get(context).edit().putString("theme_mode", value).apply()
 }

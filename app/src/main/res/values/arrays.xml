@@ -25,4 +25,15 @@
         <item>single</item>
         <item>json</item>
     </string-array>
+
+    <string-array name="theme_mode_entries">
+        <item>跟随系统</item>
+        <item>强制白天（纯白）</item>
+        <item>强制夜间（纯黑）</item>
+    </string-array>
+    <string-array name="theme_mode_values">
+        <item>system</item>
+        <item>light</item>
+        <item>dark</item>
+    </string-array>
 </resources>
