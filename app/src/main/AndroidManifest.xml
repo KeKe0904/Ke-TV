@@ -4,7 +4,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <uses-feature android:name="android.software.leanback" android:required="true" />
+    <!-- TV 可选：让 APP 同时能装到 TV 和手机上 -->
+    <uses-feature android:name="android.software.leanback" android:required="false" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
 
     <application
@@ -17,15 +18,28 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:theme="@style/Theme.TVToolbox">
 
+        <!-- 入口：同时声明 LEANBACK_LAUNCHER（TV 桌面显示）和 LAUNCHER（手机桌面显示） -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:configChanges="keyboard|keyboardHidden|navigation|screenSize|orientation">
+            android:configChanges="keyboard|keyboardHidden|navigation|screenSize|orientation|screenLayout|uiMode">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+
+        <activity
+            android:name=".PhonePreviewActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:theme="@style/Theme.TVToolbox.Fullscreen" />
 
         <service
             android:name=".PhotoDreamService"
