@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    应用图标：蓝紫渐变背景 + 白色 K 字（API 24+ 版本，带渐变效果）。
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- 渐变背景：蓝 → 紫 -->
+    <path android:pathData="M0,0h108v108h-108z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="8" android:startY="8"
+                android:endX="100" android:endY="100">
+                <item android:offset="0" android:color="#FF5B8DEF" />
+                <item android:offset="0.55" android:color="#FF8B5BF2" />
+                <item android:offset="1" android:color="#FFBF5AF2" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- 柔光装饰圆（左上角微亮） -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillAlpha="0.10"
+        android:pathData="M28,28 m-22,0 a22,22 0 1,0 44,0 a22,22 0 1,0 -44,0 z" />
+
+    <!-- K 字（白色粗 stroke，圆角端点） -->
+    <path
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="10"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M40,30 L40,78 M40,54 L74,28 M40,54 L74,80" />
+
+    <!-- 右下角小圆点装饰 -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillAlpha="0.9"
+        android:pathData="M82,82 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 z" />
+</vector>

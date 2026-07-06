@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 检查更新：下载箭头 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24"
+    android:tint="#FFFFFFFF">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M12,3 C11.45,3 11,3.45 11,4 L11,13.17 L7.71,9.88 C7.32,9.49 6.69,9.49 6.3,9.88 C5.91,10.27 5.91,10.9 6.3,11.29 L11.29,16.28 C11.49,16.48 11.74,16.58 12,16.58 C12.26,16.58 12.51,16.48 12.71,16.28 L17.7,11.29 C18.09,10.9 18.09,10.27 17.7,9.88 C17.31,9.49 16.68,9.49 16.29,9.88 L13,13.17 L13,4 C13,3.45 12.55,3 12,3 Z" />
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M5,18 L5,20 L19,20 L19,18 Z" />
+</vector>

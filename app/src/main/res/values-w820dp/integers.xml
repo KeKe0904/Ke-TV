@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 主页功能网格列数：大屏 3 列 -->
+    <integer name="grid_columns">3</integer>
+</resources>

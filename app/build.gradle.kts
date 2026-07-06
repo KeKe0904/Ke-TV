@@ -11,8 +11,8 @@ android {
         applicationId = "com.tvtoolbox.screensaver"
         minSdk = 21
         targetSdk = 34
-        versionCode = 9
-        versionName = "1.5.1"
+        versionCode = 10
+        versionName = "1.6.0"
     }
 
     // 用 debug keystore 给 release 签名，方便用户直接安装测试
@@ -60,6 +60,7 @@ dependencies {
     implementation("androidx.preference:preference-ktx:1.2.1")
 
     implementation("androidx.constraintlayout:constraintlayout:2.2.0")
+    implementation("androidx.gridlayout:gridlayout:1.0.0")
     implementation("com.google.android.material:material:1.12.0")
 
     implementation("io.coil-kt:coil:2.7.0")

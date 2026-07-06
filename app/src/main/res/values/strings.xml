@@ -71,11 +71,17 @@
     <!-- 功能区 -->
     <string name="cat_functions">功能</string>
     <string name="card_settings_title">屏保设置</string>
-    <string name="card_settings_desc">图床 URL · 切换间隔 · 动效</string>
+    <string name="card_settings_desc">图床 · 间隔 · 动效</string>
     <string name="card_start_screensaver_title">立即进入屏保</string>
     <string name="card_start_screensaver_desc">直接预览屏保效果</string>
     <string name="card_dream_settings_title">系统屏保设置</string>
-    <string name="card_dream_settings_desc">选择本 APP 作为系统屏保</string>
+    <string name="card_dream_settings_desc">选择本 APP 为系统屏保</string>
+    <string name="card_browser_title">浏览器</string>
+    <string name="card_browser_desc">敬请期待</string>
+    <string name="card_update_title">检查更新</string>
+    <string name="card_update_desc">获取最新版本</string>
+    <string name="card_about_title">关于</string>
+    <string name="card_about_desc">项目主页 · 版本信息</string>
     <string name="card_status_title">图床状态</string>
     <string name="card_status_empty">尚未配置 · 点击设置</string>
     <string name="card_status_configured">已配置</string>
@@ -84,8 +90,10 @@
     <string name="preview_hint">单击屏幕退出预览</string>
     <string name="dream_settings_unavailable">系统屏保设置不可用，已为你打开系统设置</string>
     <string name="dream_settings_fallback">系统屏保设置不可用\n你可以用「立即进入屏保」测试</string>
+    <string name="feature_coming_soon">「%1$s」功能开发中，敬请期待</string>
 
-    <string name="about_summary">Ke-TV v1.5.1 · 测试版本</string>
+    <string name="about_summary">Ke-TV v1.6.0 · 测试版本</string>
+    <string name="about_github_url">https://github.com/KeKe0904/Ke-TV</string>
 
     <!-- 对话框 -->
     <string name="dialog_ok">确定</string>

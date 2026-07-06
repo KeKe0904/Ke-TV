@@ -1,8 +1,8 @@
 package com.tvtoolbox.screensaver
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.provider.Settings
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -41,12 +41,12 @@ class MainActivity : AppCompatActivity() {
         // 天气卡片：点击刷新天气
         findViewById<View>(R.id.cardWeather).setOnClickListener { loadWeather() }
 
-        // 屏保设置
+        // 1. 屏保设置
         findViewById<View>(R.id.cardSettings).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
 
-        // 立即进入屏保
+        // 2. 立即进入屏保
         findViewById<View>(R.id.cardStartScreensaver).setOnClickListener {
             val ok = DreamSettingsHelper.triggerScreensaverNow(this)
             if (!ok) {
@@ -54,15 +54,42 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // 系统屏保设置（带 fallback）
+        // 3. 系统屏保设置（带 fallback）
         findViewById<View>(R.id.cardDreamSettings).setOnClickListener { openDreamSettings() }
+
+        // 4. 浏览器（占位，敬请期待）
+        findViewById<View>(R.id.cardBrowser).setOnClickListener {
+            Toast.makeText(
+                this,
+                getString(R.string.feature_coming_soon, getString(R.string.card_browser_title)),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        // 5. 检查更新
+        findViewById<View>(R.id.cardUpdate).setOnClickListener { checkUpdate() }
+
+        // 6. 关于：打开 GitHub 项目主页
+        findViewById<View>(R.id.cardAbout).setOnClickListener {
+            try {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.about_github_url))))
+            } catch (_: Throwable) {
+                Toast.makeText(this, "无法打开浏览器", Toast.LENGTH_SHORT).show()
+            }
+        }
 
         // ===== TV 焦点导航 =====
         val cardWeather = findViewById<View>(R.id.cardWeather)
         val cardSettings = findViewById<View>(R.id.cardSettings)
         val cardStart = findViewById<View>(R.id.cardStartScreensaver)
         val cardDream = findViewById<View>(R.id.cardDreamSettings)
-        FocusHelper.setupFocusAll(cardWeather, cardSettings, cardStart, cardDream)
+        val cardBrowser = findViewById<View>(R.id.cardBrowser)
+        val cardUpdate = findViewById<View>(R.id.cardUpdate)
+        val cardAbout = findViewById<View>(R.id.cardAbout)
+        FocusHelper.setupFocusAll(
+            cardWeather, cardSettings, cardStart, cardDream,
+            cardBrowser, cardUpdate, cardAbout
+        )
         FocusHelper.requestInitialFocus(cardSettings)
 
         // 首次加载天气
@@ -77,6 +104,7 @@ class MainActivity : AppCompatActivity() {
     /** 加载天气数据（异步）。 */
     private fun loadWeather() {
         val tvCity = findViewById<TextView>(R.id.tvCity)
+        val tvCity2 = findViewById<TextView>(R.id.tvCity2)
         val tvTemp = findViewById<TextView>(R.id.tvTemp)
         val tvDesc = findViewById<TextView>(R.id.tvWeatherDesc)
 
@@ -93,12 +121,14 @@ class MainActivity : AppCompatActivity() {
 
             if (result == null) {
                 tvCity.text = "—"
+                tvCity2.text = "—"
                 tvTemp.text = "--°"
                 tvDesc.text = getString(R.string.card_weather_error)
                 return@launch
             }
 
             tvCity.text = result.city
+            tvCity2.text = result.city
             tvTemp.text = "${result.tempC}°"
             tvDesc.text = getString(
                 R.string.card_weather_format,
@@ -121,6 +151,55 @@ class MainActivity : AppCompatActivity() {
                     DreamSettingsHelper.triggerScreensaverNow(this)
                 }
                 .setNegativeButton(R.string.dialog_cancel, null)
+                .show()
+        }
+    }
+
+    /** 检查 GitHub 最新 Release（含测试版）。 */
+    private fun checkUpdate() {
+        Toast.makeText(this, R.string.update_checking, Toast.LENGTH_SHORT).show()
+
+        scope.launch {
+            val result = withContext(Dispatchers.IO) {
+                try {
+                    UpdateChecker.check(this@MainActivity)
+                } catch (t: Throwable) {
+                    null
+                }
+            }
+
+            if (result == null) {
+                Toast.makeText(
+                    this@MainActivity,
+                    getString(R.string.update_error, "网络异常"),
+                    Toast.LENGTH_LONG
+                ).show()
+                return@launch
+            }
+
+            if (!result.hasUpdate) {
+                Toast.makeText(this@MainActivity, R.string.update_latest, Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+
+            val prereleaseTag = if (result.isPrerelease) " · ${getString(R.string.update_prerelease)}" else ""
+            val message = getString(
+                R.string.update_dialog_message,
+                result.currentVersion,
+                result.latestVersion,
+                prereleaseTag
+            )
+            androidx.appcompat.app.AlertDialog.Builder(this@MainActivity)
+                .setTitle(R.string.update_dialog_title)
+                .setMessage(message)
+                .setPositiveButton(R.string.update_dialog_download) { _, _ ->
+                    try {
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(result.downloadUrl)))
+                    } catch (_: Throwable) {
+                        Toast.makeText(this@MainActivity, "无法打开浏览器", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                .setNegativeButton(R.string.update_dialog_later, null)
                 .show()
         }
     }

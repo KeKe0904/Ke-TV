@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 功能图标圆形背景：粉色渐变（立即进入屏保） -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <gradient
+        android:type="linear"
+        android:startColor="#FFFF375F"
+        android:endColor="#FFD02E50"
+        android:angle="135" />
+    <size android:width="48dp" android:height="48dp" />
+</shape>

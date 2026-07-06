@@ -4,22 +4,28 @@
 -->
 <resources>
     <!-- 主页 Hero -->
-    <dimen name="hero_title_size">36sp</dimen>
+    <dimen name="hero_title_size">40sp</dimen>
     <dimen name="hero_subtitle_size">14sp</dimen>
     <dimen name="hero_padding_top">8dp</dimen>
-    <dimen name="hero_padding_bottom">28dp</dimen>
+    <dimen name="hero_padding_bottom">24dp</dimen>
 
-    <!-- 卡片 -->
-    <dimen name="card_padding">22dp</dimen>
-    <dimen name="card_margin_bottom">14dp</dimen>
-    <dimen name="card_title_size">16sp</dimen>
-    <dimen name="card_desc_size">12sp</dimen>
-    <dimen name="card_status_title_size">13sp</dimen>
-    <dimen name="card_status_desc_size">15sp</dimen>
-    <dimen name="card_arrow_size">24sp</dimen>
+    <!-- 天气卡片 -->
+    <dimen name="weather_temp_size">44sp</dimen>
+    <dimen name="weather_city_size">14sp</dimen>
+    <dimen name="weather_desc_size">13sp</dimen>
+    <dimen name="weather_padding">20dp</dimen>
+
+    <!-- 功能板块网格卡片 -->
+    <dimen name="func_card_padding">18dp</dimen>
+    <dimen name="func_card_margin">8dp</dimen>
+    <dimen name="func_card_radius">24dp</dimen>
+    <dimen name="func_icon_size">44dp</dimen>
+    <dimen name="func_icon_margin_bottom">12dp</dimen>
+    <dimen name="func_title_size">14sp</dimen>
+    <dimen name="func_desc_size">11sp</dimen>
 
     <!-- 容器 -->
-    <dimen name="content_padding_h">20dp</dimen>
+    <dimen name="content_padding_h">18dp</dimen>
     <dimen name="content_max_width">0dp</dimen>
 
     <!-- 设置页 -->

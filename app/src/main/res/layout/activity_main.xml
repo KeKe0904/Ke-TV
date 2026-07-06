@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    主页布局：手机和大屏共用，所有尺寸用 @dimen 引用。
-    顶部：当前时间 + 日期（TextClock 自动刷新）
-    天气卡片：城市 / 温度 / 描述 / 湿度 / 风速
-    功能卡片：屏保设置 / 立即进入屏保 / 系统屏保设置 / 检查更新
+    主页布局：手机和大屏共用，所有尺寸用 @dimen 引用，列数用 @integer 引用。
+
+    结构：
+    1. 顶部 Hero：大字时间 + 日期 + 城市
+    2. 天气卡片：温度 + 描述（点击刷新）
+    3. 功能网格：6 个板块（屏保设置 / 立即进入 / 系统屏保 / 浏览器 / 检查更新 / 关于）
+       每个板块 = 圆形彩色图标 + 标题 + 简短描述
+       手机 2 列，大屏 3 列（@integer/grid_columns 控制）
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -114,52 +118,55 @@
                     android:id="@+id/cardWeather"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
+                    android:orientation="horizontal"
                     android:background="@drawable/glass_card_ripple"
                     android:clickable="true"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
-                    android:padding="@dimen/card_padding"
-                    android:layout_marginBottom="@dimen/card_margin_bottom">
+                    android:padding="@dimen/weather_padding"
+                    android:layout_marginBottom="20dp"
+                    android:gravity="center_vertical">
 
+                    <!-- 左侧：城市 + 描述 -->
                     <LinearLayout
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
                         <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/card_weather_title"
-                            android:textColor="@color/text_primary"
-                            android:textSize="@dimen/card_status_title_size"
-                            android:fontFamily="sans-serif-medium"
-                            android:letterSpacing="0.06"
-                            android:textAllCaps="true" />
-
-                        <TextView
-                            android:id="@+id/tvTemp"
+                            android:id="@+id/tvCity2"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="--°"
-                            android:textColor="@color/accent_blue"
-                            android:textSize="@dimen/card_status_title_size"
-                            android:fontFamily="sans-serif-medium" />
+                            android:text="—"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/weather_city_size"
+                            android:fontFamily="sans-serif-light"
+                            android:letterSpacing="0.05" />
+
+                        <TextView
+                            android:id="@+id/tvWeatherDesc"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:text="@string/card_weather_loading"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/weather_desc_size"
+                            android:fontFamily="sans-serif-light"
+                            android:maxLines="2"
+                            android:ellipsize="end" />
                     </LinearLayout>
 
+                    <!-- 右侧：大字温度 -->
                     <TextView
-                        android:id="@+id/tvWeatherDesc"
+                        android:id="@+id/tvTemp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="@string/card_weather_loading"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="@dimen/card_status_desc_size"
-                        android:fontFamily="sans-serif-light"
-                        android:maxLines="2"
-                        android:ellipsize="end" />
+                        android:text="--°"
+                        android:textColor="@color/accent_blue"
+                        android:textSize="@dimen/weather_temp_size"
+                        android:fontFamily="sans-serif-thin"
+                        android:includeFontPadding="false" />
                 </LinearLayout>
 
                 <!-- ===== 功能区标题 ===== -->
@@ -167,8 +174,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginBottom="10dp"
+                    android:layout_marginBottom="12dp"
                     android:text="@string/cat_functions"
                     android:textColor="@color/text_tertiary"
                     android:textSize="@dimen/settings_section_label_size"
@@ -176,33 +182,47 @@
                     android:letterSpacing="0.1"
                     android:textAllCaps="true" />
 
-                <!-- 屏保设置 -->
-                <LinearLayout
-                    android:id="@+id/cardSettings"
+                <!-- ===== 功能板块网格 ===== -->
+                <androidx.gridlayout.widget.GridLayout
+                    android:id="@+id/gridFunctions"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:background="@drawable/glass_card_ripple"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
-                    android:padding="@dimen/card_padding"
-                    android:layout_marginBottom="@dimen/card_margin_bottom"
-                    android:gravity="center_vertical">
+                    app:columnCount="@integer/grid_columns"
+                    app:orientation="horizontal"
+                    app:useDefaultMargins="false">
 
+                    <!-- 1. 屏保设置 -->
                     <LinearLayout
+                        android:id="@+id/cardSettings"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:background="@drawable/glass_card_ripple"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:padding="@dimen/func_card_padding"
+                        android:layout_margin="@dimen/func_card_margin"
+                        android:gravity="center_horizontal"
+                        app:layout_columnWeight="1"
+                        app:layout_gravity="fill">
+
+                        <ImageView
+                            android:layout_width="@dimen/func_icon_size"
+                            android:layout_height="@dimen/func_icon_size"
+                            android:background="@drawable/func_icon_bg_blue"
+                            android:src="@drawable/ic_func_settings"
+                            android:scaleType="center"
+                            android:layout_marginBottom="@dimen/func_icon_margin_bottom" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/card_settings_title"
                             android:textColor="@color/text_primary"
-                            android:textSize="@dimen/card_title_size"
-                            android:fontFamily="sans-serif-medium" />
+                            android:textSize="@dimen/func_title_size"
+                            android:fontFamily="sans-serif-medium"
+                            android:gravity="center" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -210,45 +230,43 @@
                             android:layout_marginTop="3dp"
                             android:text="@string/card_settings_desc"
                             android:textColor="@color/text_tertiary"
-                            android:textSize="@dimen/card_desc_size"
-                            android:fontFamily="sans-serif-light" />
+                            android:textSize="@dimen/func_desc_size"
+                            android:fontFamily="sans-serif-light"
+                            android:gravity="center" />
                     </LinearLayout>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="›"
-                        android:textColor="@color/text_tertiary"
-                        android:textSize="@dimen/card_arrow_size" />
-                </LinearLayout>
-
-                <!-- 立即进入屏保 -->
-                <LinearLayout
-                    android:id="@+id/cardStartScreensaver"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:background="@drawable/glass_card_ripple"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
-                    android:padding="@dimen/card_padding"
-                    android:layout_marginBottom="@dimen/card_margin_bottom"
-                    android:gravity="center_vertical">
-
+                    <!-- 2. 立即进入屏保 -->
                     <LinearLayout
+                        android:id="@+id/cardStartScreensaver"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:background="@drawable/glass_card_ripple"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:padding="@dimen/func_card_padding"
+                        android:layout_margin="@dimen/func_card_margin"
+                        android:gravity="center_horizontal"
+                        app:layout_columnWeight="1"
+                        app:layout_gravity="fill">
+
+                        <ImageView
+                            android:layout_width="@dimen/func_icon_size"
+                            android:layout_height="@dimen/func_icon_size"
+                            android:background="@drawable/func_icon_bg_pink"
+                            android:src="@drawable/ic_func_play"
+                            android:scaleType="center"
+                            android:layout_marginBottom="@dimen/func_icon_margin_bottom" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/card_start_screensaver_title"
                             android:textColor="@color/text_primary"
-                            android:textSize="@dimen/card_title_size"
-                            android:fontFamily="sans-serif-medium" />
+                            android:textSize="@dimen/func_title_size"
+                            android:fontFamily="sans-serif-medium"
+                            android:gravity="center" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -256,45 +274,43 @@
                             android:layout_marginTop="3dp"
                             android:text="@string/card_start_screensaver_desc"
                             android:textColor="@color/text_tertiary"
-                            android:textSize="@dimen/card_desc_size"
-                            android:fontFamily="sans-serif-light" />
+                            android:textSize="@dimen/func_desc_size"
+                            android:fontFamily="sans-serif-light"
+                            android:gravity="center" />
                     </LinearLayout>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="›"
-                        android:textColor="@color/text_tertiary"
-                        android:textSize="@dimen/card_arrow_size" />
-                </LinearLayout>
-
-                <!-- 系统屏保设置 -->
-                <LinearLayout
-                    android:id="@+id/cardDreamSettings"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:background="@drawable/glass_card_ripple"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
-                    android:padding="@dimen/card_padding"
-                    android:layout_marginBottom="@dimen/card_margin_bottom"
-                    android:gravity="center_vertical">
-
+                    <!-- 3. 系统屏保设置 -->
                     <LinearLayout
+                        android:id="@+id/cardDreamSettings"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:background="@drawable/glass_card_ripple"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:padding="@dimen/func_card_padding"
+                        android:layout_margin="@dimen/func_card_margin"
+                        android:gravity="center_horizontal"
+                        app:layout_columnWeight="1"
+                        app:layout_gravity="fill">
+
+                        <ImageView
+                            android:layout_width="@dimen/func_icon_size"
+                            android:layout_height="@dimen/func_icon_size"
+                            android:background="@drawable/func_icon_bg_purple"
+                            android:src="@drawable/ic_func_dream"
+                            android:scaleType="center"
+                            android:layout_marginBottom="@dimen/func_icon_margin_bottom" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/card_dream_settings_title"
                             android:textColor="@color/text_primary"
-                            android:textSize="@dimen/card_title_size"
-                            android:fontFamily="sans-serif-medium" />
+                            android:textSize="@dimen/func_title_size"
+                            android:fontFamily="sans-serif-medium"
+                            android:gravity="center" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -302,22 +318,149 @@
                             android:layout_marginTop="3dp"
                             android:text="@string/card_dream_settings_desc"
                             android:textColor="@color/text_tertiary"
-                            android:textSize="@dimen/card_desc_size"
-                            android:fontFamily="sans-serif-light" />
+                            android:textSize="@dimen/func_desc_size"
+                            android:fontFamily="sans-serif-light"
+                            android:gravity="center" />
                     </LinearLayout>
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <!-- 4. 浏览器（占位） -->
+                    <LinearLayout
+                        android:id="@+id/cardBrowser"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="›"
-                        android:textColor="@color/text_tertiary"
-                        android:textSize="@dimen/card_arrow_size" />
-                </LinearLayout>
+                        android:orientation="vertical"
+                        android:background="@drawable/glass_card_ripple"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:padding="@dimen/func_card_padding"
+                        android:layout_margin="@dimen/func_card_margin"
+                        android:gravity="center_horizontal"
+                        app:layout_columnWeight="1"
+                        app:layout_gravity="fill">
+
+                        <ImageView
+                            android:layout_width="@dimen/func_icon_size"
+                            android:layout_height="@dimen/func_icon_size"
+                            android:background="@drawable/func_icon_bg_green"
+                            android:src="@drawable/ic_func_browser"
+                            android:scaleType="center"
+                            android:layout_marginBottom="@dimen/func_icon_margin_bottom" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/card_browser_title"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/func_title_size"
+                            android:fontFamily="sans-serif-medium"
+                            android:gravity="center" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3dp"
+                            android:text="@string/card_browser_desc"
+                            android:textColor="@color/text_tertiary"
+                            android:textSize="@dimen/func_desc_size"
+                            android:fontFamily="sans-serif-light"
+                            android:gravity="center" />
+                    </LinearLayout>
+
+                    <!-- 5. 检查更新 -->
+                    <LinearLayout
+                        android:id="@+id/cardUpdate"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:background="@drawable/glass_card_ripple"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:padding="@dimen/func_card_padding"
+                        android:layout_margin="@dimen/func_card_margin"
+                        android:gravity="center_horizontal"
+                        app:layout_columnWeight="1"
+                        app:layout_gravity="fill">
+
+                        <ImageView
+                            android:layout_width="@dimen/func_icon_size"
+                            android:layout_height="@dimen/func_icon_size"
+                            android:background="@drawable/func_icon_bg_orange"
+                            android:src="@drawable/ic_func_update"
+                            android:scaleType="center"
+                            android:layout_marginBottom="@dimen/func_icon_margin_bottom" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/card_update_title"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/func_title_size"
+                            android:fontFamily="sans-serif-medium"
+                            android:gravity="center" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3dp"
+                            android:text="@string/card_update_desc"
+                            android:textColor="@color/text_tertiary"
+                            android:textSize="@dimen/func_desc_size"
+                            android:fontFamily="sans-serif-light"
+                            android:gravity="center" />
+                    </LinearLayout>
+
+                    <!-- 6. 关于 -->
+                    <LinearLayout
+                        android:id="@+id/cardAbout"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:background="@drawable/glass_card_ripple"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:padding="@dimen/func_card_padding"
+                        android:layout_margin="@dimen/func_card_margin"
+                        android:gravity="center_horizontal"
+                        app:layout_columnWeight="1"
+                        app:layout_gravity="fill">
+
+                        <ImageView
+                            android:layout_width="@dimen/func_icon_size"
+                            android:layout_height="@dimen/func_icon_size"
+                            android:background="@drawable/func_icon_bg_gray"
+                            android:src="@drawable/ic_func_about"
+                            android:scaleType="center"
+                            android:layout_marginBottom="@dimen/func_icon_margin_bottom" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/card_about_title"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/func_title_size"
+                            android:fontFamily="sans-serif-medium"
+                            android:gravity="center" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3dp"
+                            android:text="@string/card_about_desc"
+                            android:textColor="@color/text_tertiary"
+                            android:textSize="@dimen/func_desc_size"
+                            android:fontFamily="sans-serif-light"
+                            android:gravity="center" />
+                    </LinearLayout>
+
+                </androidx.gridlayout.widget.GridLayout>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginTop="24dp"
                     android:gravity="center"
                     android:text="@string/about_summary"
                     android:textColor="@color/text_tertiary"
