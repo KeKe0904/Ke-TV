@@ -259,14 +259,9 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun openDreamSettings() {
-        try {
-            startActivity(Intent(Settings.ACTION_DREAM_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-        } catch (t: Throwable) {
-            try {
-                startActivity(Intent(Settings.ACTION_SETTINGS))
-            } catch (_: Throwable) {
-                Toast.makeText(this, "无法打开系统设置", Toast.LENGTH_SHORT).show()
-            }
+        val ok = DreamSettingsHelper.openDreamSettings(this)
+        if (!ok) {
+            Toast.makeText(this, R.string.dream_settings_unavailable, Toast.LENGTH_LONG).show()
         }
     }
 

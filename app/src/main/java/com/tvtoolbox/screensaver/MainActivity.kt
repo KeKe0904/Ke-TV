@@ -5,19 +5,28 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeHelper.apply(this)
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        // TV 和手机都显示主页，不再跳转。TV 用 D-pad 焦点导航。
         setContentView(R.layout.activity_main)
 
         // 处理状态栏 insets，给 toolbar 加顶部 padding
@@ -28,50 +37,91 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        // 卡片点击
-        findViewById<View>(R.id.cardStatus).setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
-        }
-        findViewById<View>(R.id.cardPreview).setOnClickListener {
-            startActivity(Intent(this, PhonePreviewActivity::class.java))
-        }
+        // ===== 卡片点击 =====
+        // 天气卡片：点击刷新天气
+        findViewById<View>(R.id.cardWeather).setOnClickListener { loadWeather() }
+
+        // 屏保设置
         findViewById<View>(R.id.cardSettings).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
-        findViewById<View>(R.id.cardDreamSettings).setOnClickListener {
-            try {
-                startActivity(Intent(Settings.ACTION_DREAM_SETTINGS))
-            } catch (_: Throwable) {
-                startActivity(Intent(Settings.ACTION_SETTINGS))
+
+        // 立即进入屏保
+        findViewById<View>(R.id.cardStartScreensaver).setOnClickListener {
+            val ok = DreamSettingsHelper.triggerScreensaverNow(this)
+            if (!ok) {
+                Toast.makeText(this, "无法启动屏保", Toast.LENGTH_SHORT).show()
             }
         }
 
-        // TV: 给所有卡片设置焦点导航；进入页面时默认聚焦第一个卡片
-        val cardStatus = findViewById<View>(R.id.cardStatus)
-        val cardPreview = findViewById<View>(R.id.cardPreview)
+        // 系统屏保设置（带 fallback）
+        findViewById<View>(R.id.cardDreamSettings).setOnClickListener { openDreamSettings() }
+
+        // ===== TV 焦点导航 =====
+        val cardWeather = findViewById<View>(R.id.cardWeather)
         val cardSettings = findViewById<View>(R.id.cardSettings)
-        val cardDreamSettings = findViewById<View>(R.id.cardDreamSettings)
-        FocusHelper.setupFocusAll(cardStatus, cardPreview, cardSettings, cardDreamSettings)
-        FocusHelper.requestInitialFocus(cardStatus)
+        val cardStart = findViewById<View>(R.id.cardStartScreensaver)
+        val cardDream = findViewById<View>(R.id.cardDreamSettings)
+        FocusHelper.setupFocusAll(cardWeather, cardSettings, cardStart, cardDream)
+        FocusHelper.requestInitialFocus(cardSettings)
+
+        // 首次加载天气
+        loadWeather()
     }
 
-    override fun onResume() {
-        super.onResume()
-        refreshStatus()
+    override fun onDestroy() {
+        super.onDestroy()
+        scope.cancel()
     }
 
-    private fun refreshStatus() {
-        val url = Prefs.imageUrl(this)
-        val badge = findViewById<TextView>(R.id.tvStatusBadge)
-        val desc = findViewById<TextView>(R.id.tvStatusDesc)
-        if (url.isBlank()) {
-            badge.text = getString(R.string.card_status_empty)
-            badge.setTextColor(getColor(R.color.accent_orange))
-            desc.text = getString(R.string.card_status_empty)
-        } else {
-            badge.text = getString(R.string.card_status_configured)
-            badge.setTextColor(getColor(R.color.accent_green))
-            desc.text = url
+    /** 加载天气数据（异步）。 */
+    private fun loadWeather() {
+        val tvCity = findViewById<TextView>(R.id.tvCity)
+        val tvTemp = findViewById<TextView>(R.id.tvTemp)
+        val tvDesc = findViewById<TextView>(R.id.tvWeatherDesc)
+
+        tvDesc.text = getString(R.string.card_weather_loading)
+
+        scope.launch {
+            val result = withContext(Dispatchers.IO) {
+                try {
+                    WeatherFetcher().fetch()
+                } catch (t: Throwable) {
+                    null
+                }
+            }
+
+            if (result == null) {
+                tvCity.text = "—"
+                tvTemp.text = "--°"
+                tvDesc.text = getString(R.string.card_weather_error)
+                return@launch
+            }
+
+            tvCity.text = result.city
+            tvTemp.text = "${result.tempC}°"
+            tvDesc.text = getString(
+                R.string.card_weather_format,
+                result.desc,
+                result.humidity,
+                result.wind
+            )
+        }
+    }
+
+    /** 打开系统屏保设置，TV 上多级 fallback。 */
+    private fun openDreamSettings() {
+        val ok = DreamSettingsHelper.openDreamSettings(this)
+        if (!ok) {
+            // 所有 Intent 都失败，提示用户用「立即进入屏保」
+            AlertDialog.Builder(this)
+                .setTitle(R.string.card_dream_settings_title)
+                .setMessage(R.string.dream_settings_fallback)
+                .setPositiveButton(R.string.card_start_screensaver_title) { _, _ ->
+                    DreamSettingsHelper.triggerScreensaverNow(this)
+                }
+                .setNegativeButton(R.string.dialog_cancel, null)
+                .show()
         }
     }
 }

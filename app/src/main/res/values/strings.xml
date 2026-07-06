@@ -50,8 +50,6 @@
     <string name="update_dialog_later">稍后</string>
     <string name="update_error">检查更新失败：%1$s</string>
 
-    <string name="about_summary">Ke-TV v1.5.0 · 测试版本</string>
-
     <string name="settings_title">屏保设置</string>
     <string name="test_running">正在测试…</string>
     <string name="test_ok">成功：拉取到 %1$d 张图片</string>
@@ -63,16 +61,31 @@
     <!-- 手机端主页 -->
     <string name="hero_title">Ke-TV</string>
     <string name="hero_subtitle">自定义图床 · 流光屏保 · 测试版</string>
+
+    <!-- 主页天气/时间 -->
+    <string name="card_weather_title">当前天气</string>
+    <string name="card_weather_loading">加载中…</string>
+    <string name="card_weather_error">天气获取失败 · 点击重试</string>
+    <string name="card_weather_format">%1$s · 湿度 %2$s%% · 风速 %3$s km/h</string>
+
+    <!-- 功能区 -->
+    <string name="cat_functions">功能</string>
+    <string name="card_settings_title">屏保设置</string>
+    <string name="card_settings_desc">图床 URL · 切换间隔 · 动效</string>
+    <string name="card_start_screensaver_title">立即进入屏保</string>
+    <string name="card_start_screensaver_desc">直接预览屏保效果</string>
+    <string name="card_dream_settings_title">系统屏保设置</string>
+    <string name="card_dream_settings_desc">选择本 APP 作为系统屏保</string>
     <string name="card_status_title">图床状态</string>
     <string name="card_status_empty">尚未配置 · 点击设置</string>
     <string name="card_status_configured">已配置</string>
     <string name="card_preview_title">预览屏保</string>
     <string name="card_preview_desc">全屏播放 · 单击退出</string>
-    <string name="card_settings_title">屏保设置</string>
-    <string name="card_settings_desc">图床 URL · 切换间隔 · 动效</string>
-    <string name="card_dream_settings_title">系统屏保设置</string>
-    <string name="card_dream_settings_desc">选择本 APP 作为系统屏保</string>
     <string name="preview_hint">单击屏幕退出预览</string>
+    <string name="dream_settings_unavailable">系统屏保设置不可用，已为你打开系统设置</string>
+    <string name="dream_settings_fallback">系统屏保设置不可用\n你可以用「立即进入屏保」测试</string>
+
+    <string name="about_summary">Ke-TV v1.5.1 · 测试版本</string>
 
     <!-- 对话框 -->
     <string name="dialog_ok">确定</string>
