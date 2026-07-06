@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TV 工具箱</string>
+    <string name="dream_label">TV 工具箱屏保</string>
+
+    <string name="cat_image_source">图床设置</string>
+    <string name="cat_actions">操作</string>
+    <string name="cat_about">关于</string>
+
+    <string name="pref_image_url_title">图床 URL</string>
+    <string name="pref_image_url_summary">返回 JSON 图片列表的接口地址</string>
+    <string name="pref_image_url_dialog">输入图床 URL</string>
+
+    <string name="pref_interval_title">切换间隔</string>
+
+    <string name="pref_random_title">随机顺序</string>
+    <string name="pref_random_summary">打乱图片播放顺序</string>
+
+    <string name="pref_ken_burns_title">动态平移缩放</string>
+    <string name="pref_ken_burns_summary">Ken Burns 效果，让画面缓慢移动</string>
+
+    <string name="pref_test_title">测试图床连通性</string>
+    <string name="pref_test_summary">拉取一次 JSON 并显示结果</string>
+
+    <string name="pref_open_dream_settings_title">打开系统屏保设置</string>
+    <string name="pref_open_dream_settings_summary">在这里选择本 APP 作为系统屏保</string>
+
+    <string name="about_summary">TV 工具箱 v1.0\n自定义图床屏保</string>
+
+    <string name="settings_title">屏保设置</string>
+    <string name="test_running">正在测试…</string>
+    <string name="test_ok">成功：拉取到 %1$d 张图片</string>
+    <string name="test_fail">失败：%1$s</string>
+    <string name="no_url">请先设置图床 URL</string>
+    <string name="loading">加载中…</string>
+    <string name="empty">没有可显示的图片</string>
+</resources>

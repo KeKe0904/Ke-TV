@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory android:title="@string/cat_image_source">
+
+        <EditTextPreference
+            android:key="image_url"
+            android:title="@string/pref_image_url_title"
+            android:summary="@string/pref_image_url_summary"
+            android:dialogTitle="@string/pref_image_url_dialog"
+            android:hint="https://example.com/images.json" />
+
+        <ListPreference
+            android:key="interval_seconds"
+            android:title="@string/pref_interval_title"
+            android:summary="%s"
+            android:entries="@array/interval_entries"
+            android:entryValues="@array/interval_values"
+            android:defaultValue="15" />
+
+        <SwitchPreferenceCompat
+            android:key="random_order"
+            android:title="@string/pref_random_title"
+            android:summary="@string/pref_random_summary"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="ken_burns"
+            android:title="@string/pref_ken_burns_title"
+            android:summary="@string/pref_ken_burns_summary"
+            android:defaultValue="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/cat_actions">
+
+        <Preference
+            android:key="test_fetch"
+            android:title="@string/pref_test_title"
+            android:summary="@string/pref_test_summary" />
+
+        <Preference
+            android:key="open_dream_settings"
+            android:title="@string/pref_open_dream_settings_title"
+            android:summary="@string/pref_open_dream_settings_summary" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/cat_about">
+
+        <Preference
+            android:key="about"
+            android:title="@string/app_name"
+            android:summary="@string/about_summary" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
