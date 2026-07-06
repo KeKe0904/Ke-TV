@@ -33,6 +33,10 @@ class SettingsActivity : AppCompatActivity() {
     private val intervalEntries by lazy { resources.getStringArray(R.array.interval_entries) }
     private val intervalValues by lazy { resources.getStringArray(R.array.interval_values) }
 
+    // 图床类型选项
+    private val sourceModeEntries by lazy { resources.getStringArray(R.array.source_mode_entries) }
+    private val sourceModeValues by lazy { resources.getStringArray(R.array.source_mode_values) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
@@ -60,6 +64,8 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun bindRows() {
+        // 图床类型
+        findViewById<View>(R.id.rowSourceMode).setOnClickListener { showSourceModeDialog() }
         // 图床 URL
         findViewById<View>(R.id.rowImageUrl).setOnClickListener { showUrlDialog() }
         // 切换间隔
@@ -84,6 +90,13 @@ class SettingsActivity : AppCompatActivity() {
 
     /** 刷新所有行的显示状态。 */
     private fun refreshUi() {
+        // 图床类型
+        val mode = Prefs.sourceMode(this)
+        val modeIdx = sourceModeValues.indexOf(mode).coerceAtLeast(0)
+        val modeText = if (modeIdx in sourceModeEntries.indices) sourceModeEntries[modeIdx]
+            else getString(R.string.pref_source_mode_single)
+        findViewById<android.widget.TextView>(R.id.tvSourceModeValue).text = modeText
+
         // URL
         val url = Prefs.imageUrl(this)
         val urlText = if (url.isBlank()) getString(R.string.pref_image_url_summary) else url
@@ -98,6 +111,23 @@ class SettingsActivity : AppCompatActivity() {
         // 开关
         findViewById<MaterialSwitch>(R.id.switchRandom).isChecked = Prefs.randomOrder(this)
         findViewById<MaterialSwitch>(R.id.switchKenBurns).isChecked = Prefs.kenBurns(this)
+    }
+
+    /** 图床类型单选对话框。 */
+    private fun showSourceModeDialog() {
+        val cur = Prefs.sourceMode(this)
+        val checked = sourceModeValues.indexOf(cur).coerceAtLeast(0)
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.dialog_source_mode_title)
+            .setSingleChoiceItems(sourceModeEntries, checked) { dialog, which ->
+                if (which in sourceModeValues.indices) {
+                    Prefs.setSourceMode(this, sourceModeValues[which])
+                    refreshUi()
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.dialog_cancel, null)
+            .show()
     }
 
     /** 图床 URL 输入对话框（修复 v1.1 点击无反应的 bug）。 */
@@ -150,7 +180,7 @@ class SettingsActivity : AppCompatActivity() {
         scope.launch {
             val msg = withContext(Dispatchers.IO) {
                 try {
-                    val list = ImageFetcher().fetch(url)
+                    val list = ImageFetcher().fetch(url, Prefs.sourceMode(this@SettingsActivity))
                     getString(R.string.test_ok, list.size)
                 } catch (t: Throwable) {
                     getString(R.string.test_fail, t.message ?: "?")

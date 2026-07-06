@@ -50,6 +50,9 @@ class PhotoSlideshowController(
     private var imageLoader: ImageLoader? = null
     private var running: Boolean = false
 
+    /** 单图模式（随机图 API）：每次切换都给 URL 加 cache-buster 拉新图。 */
+    private var singleMode: Boolean = true
+
     /** 把 ImageView 和提示 TextView 加到 container。调用一次即可。 */
     fun attachViews() {
         imageView = ImageView(context).apply {
@@ -96,10 +99,14 @@ class PhotoSlideshowController(
         }
 
         showHint(context.getString(R.string.loading))
+        singleMode = Prefs.sourceMode(context) != "json"
         scope.launch {
             try {
-                val fetched = ImageFetcher().fetch(url)
-                urls = if (Prefs.randomOrder(context)) {
+                val fetched = ImageFetcher().fetch(url, Prefs.sourceMode(context))
+                urls = if (singleMode) {
+                    // 单图模式：每次切换都会用 cache-buster 拉新图，不必 shuffle
+                    fetched
+                } else if (Prefs.randomOrder(context)) {
                     fetched.shuffled(Random(System.currentTimeMillis()))
                 } else {
                     fetched
@@ -138,7 +145,9 @@ class PhotoSlideshowController(
     private fun showCurrent() {
         if (urls.isEmpty()) return
         val safeIndex = ((index % urls.size) + urls.size) % urls.size
-        val u = urls[safeIndex]
+        val rawUrl = urls[safeIndex]
+        // 单图模式：每次切换加 cache-buster，绕过 Coil/网络缓存拉新随机图
+        val u = if (singleMode) cacheBuster(rawUrl) else rawUrl
         Log.d(TAG, "show $u")
 
         val req = ImageRequest.Builder(context)
@@ -160,6 +169,12 @@ class PhotoSlideshowController(
             )
             .build()
         imageLoader?.enqueue(req)
+    }
+
+    /** 给 URL 加随机 query 参数绕过缓存。已有 query 则追加 &_t=，否则 ?_t=。 */
+    private fun cacheBuster(url: String): String {
+        val sep = if (url.contains('?')) '&' else '?'
+        return "${url}${sep}_t=${System.currentTimeMillis()}"
     }
 
     private fun scheduleNext() {

@@ -32,4 +32,11 @@ object Prefs {
 
     fun setKenBurns(context: Context, value: Boolean) =
         get(context).edit().putBoolean("ken_burns", value).apply()
+
+    /** 图床类型：single = 单图 URL（随机图），json = JSON 列表。默认 single。 */
+    fun sourceMode(context: Context): String =
+        get(context).getString("source_mode", "single") ?: "single"
+
+    fun setSourceMode(context: Context, value: String) =
+        get(context).edit().putString("source_mode", value).apply()
 }

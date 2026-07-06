@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- 主题：液态玻璃风格 -->
-    <style name="Theme.TVToolbox" parent="Theme.Material3.Dark.NoActionBar">
+    <!-- 主题：液态玻璃风格（白天默认，跟随系统夜间模式自动切换） -->
+    <style name="Theme.TVToolbox" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/accent_blue</item>
         <item name="colorOnPrimary">#FFFFFFFF</item>
         <item name="colorSecondary">@color/accent_purple</item>
@@ -13,8 +13,9 @@
         <item name="android:colorBackground">@color/bg_base</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar">false</item>
+        <!-- 白天：状态栏/导航栏图标用深色 -->
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
         <!-- 文本选择/对话框 -->
         <item name="materialAlertDialogTheme">@style/Theme.TVToolbox.AlertDialog</item>
     </style>

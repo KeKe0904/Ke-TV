@@ -2,6 +2,7 @@ package com.tvtoolbox.screensaver
 
 import android.animation.ValueAnimator
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -15,8 +16,9 @@ import kotlin.math.sin
 /**
  * 液态玻璃背景 View。
  *
- * 4 个彩色光晕在深色背景上缓慢漂浮，模拟 macOS Sonoma / iOS 流光效果。
- * 作为 Activity 的背景层，毛玻璃卡片叠在上面形成"液态玻璃"视觉。
+ * 4 个彩色光晕在背景上缓慢漂浮，模拟 macOS Sonoma / iOS 流光效果。
+ * 背景纯色：系统夜间模式 → 纯黑；白天模式 → 纯白（默认）。
+ * 光晕在白底上更柔和、alpha 略低；黑底上更通透。
  */
 class LiquidBackgroundView @JvmOverloads constructor(
     context: Context,
@@ -45,6 +47,15 @@ class LiquidBackgroundView @JvmOverloads constructor(
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private var time = 0f
 
+    /** 强制夜间（黑色背景）。屏保（DreamService）通常设为 true，避免白光刺眼。 */
+    var forceNight: Boolean = false
+
+    /** 当前是否为夜间模式：forceNight 优先，否则跟随系统 uiMode。 */
+    private val isNight: Boolean
+        get() = forceNight ||
+            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
+            Configuration.UI_MODE_NIGHT_YES
+
     private val animator = ValueAnimator.ofFloat(0f, (Math.PI * 2.0 * 60.0).toFloat()).apply {
         duration = 120000L
         repeatCount = ValueAnimator.INFINITE
@@ -67,13 +78,17 @@ class LiquidBackgroundView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        // 深色基底
-        canvas.drawColor(0xFF08080C.toInt())
+        val night = isNight
+
+        // 纯色基底：夜间纯黑，白天纯白
+        canvas.drawColor(if (night) Color.BLACK else Color.WHITE)
 
         val w = width.toFloat()
         val h = height.toFloat()
         val shortEdge = minOf(w, h)
 
+        // 白底上光晕更柔和（alpha 低），黑底上更通透（alpha 高）
+        val blobAlpha = if (night) 130 else 95
         for (b in blobs) {
             val phase = time * b.speed + b.phase
             val cx = (b.baseX + b.driftX * sin(phase * 1.7f).toFloat()) * w
@@ -86,13 +101,13 @@ class LiquidBackgroundView @JvmOverloads constructor(
                 floatArrayOf(0f, 1f),
                 Shader.TileMode.CLAMP
             )
-            paint.alpha = 130
+            paint.alpha = blobAlpha
             canvas.drawRect(0f, 0f, w, h, paint)
         }
 
-        // 顶部一层轻微暗化，保证文字对比度
+        // 顶部一层轻微暗化（夜间）/ 暗化（白天），保证文字对比度
         paint.shader = null
-        paint.alpha = 40
-        canvas.drawColor(0x08000000)
+        paint.alpha = if (night) 40 else 18
+        canvas.drawColor(if (night) 0x08000000 else 0x10000000)
     }
 }

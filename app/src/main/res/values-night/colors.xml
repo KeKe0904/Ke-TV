@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 液态玻璃配色：夜间（纯黑底） -->
+    <color name="bg_base">#FF000000</color>
+    <color name="glass_fill">#1AFFFFFF</color>
+    <color name="glass_fill_strong">#26FFFFFF</color>
+    <color name="glass_stroke">#33FFFFFF</color>
+    <color name="glass_stroke_strong">#55FFFFFF</color>
+
+    <!-- 文字：夜间为浅色 -->
+    <color name="text_primary">#FFFFFFFF</color>
+    <color name="text_secondary">#B3FFFFFF</color>
+    <color name="text_tertiary">#80FFFFFF</color>
+
+    <!-- 兼容旧引用 -->
+    <color name="bg_dark">#FF000000</color>
+    <color name="bg_card">#1AFFFFFF</color>
+</resources>

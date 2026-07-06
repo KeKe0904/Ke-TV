@@ -9,9 +9,15 @@
     <string name="cat_about">关于</string>
 
     <string name="pref_image_url_title">图床 URL</string>
-    <string name="pref_image_url_summary">返回 JSON 图片列表的接口地址</string>
+    <string name="pref_image_url_summary">单图 URL 或 JSON 列表接口地址</string>
     <string name="pref_image_url_dialog">输入图床 URL</string>
-    <string name="pref_image_url_hint">https://example.com/images.json</string>
+    <string name="pref_image_url_hint">https://t.alcy.cc/ycy</string>
+
+    <string name="pref_source_mode_title">图床类型</string>
+    <string name="pref_source_mode_summary">单图 URL（随机图）或 JSON 列表</string>
+    <string name="pref_source_mode_single">单图 URL（随机图）</string>
+    <string name="pref_source_mode_json">JSON 列表</string>
+    <string name="dialog_source_mode_title">图床类型</string>
 
     <string name="pref_interval_title">切换间隔</string>
     <string name="pref_interval_summary">%s</string>
@@ -23,12 +29,12 @@
     <string name="pref_ken_burns_summary">Ken Burns 效果，让画面缓慢移动</string>
 
     <string name="pref_test_title">测试图床连通性</string>
-    <string name="pref_test_summary">拉取一次 JSON 并显示结果</string>
+    <string name="pref_test_summary">拉取一次并显示结果</string>
 
     <string name="pref_open_dream_settings_title">打开系统屏保设置</string>
     <string name="pref_open_dream_settings_summary">在这里选择本 APP 作为系统屏保</string>
 
-    <string name="about_summary">TV 工具箱 v1.2 · 自定义图床屏保</string>
+    <string name="about_summary">TV 工具箱 v1.3 · 自定义图床屏保</string>
 
     <string name="settings_title">屏保设置</string>
     <string name="test_running">正在测试…</string>
@@ -57,6 +63,6 @@
     <string name="dialog_cancel">取消</string>
     <string name="dialog_save">保存</string>
     <string name="dialog_url_title">图床 URL</string>
-    <string name="dialog_url_message">粘贴返回 JSON 图片列表的接口地址</string>
+    <string name="dialog_url_message">粘贴图床 URL（单图或 JSON 列表）</string>
     <string name="dialog_interval_title">切换间隔</string>
 </resources>

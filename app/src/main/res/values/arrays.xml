@@ -16,4 +16,13 @@
         <item>60</item>
         <item>300</item>
     </string-array>
+
+    <string-array name="source_mode_entries">
+        <item>单图 URL（随机图）</item>
+        <item>JSON 列表</item>
+    </string-array>
+    <string-array name="source_mode_values">
+        <item>single</item>
+        <item>json</item>
+    </string-array>
 </resources>

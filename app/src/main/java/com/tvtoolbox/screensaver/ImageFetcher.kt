@@ -8,30 +8,57 @@ import okhttp3.Request
 import java.util.concurrent.TimeUnit
 
 /**
- * 图床 JSON 解析器。
+ * 图床解析器。支持两种模式：
  *
- * 支持以下 JSON 格式（自动识别）：
- *  1) ["url1", "url2", ...]                          字符串数组
- *  2) [{"url": "..."}, {"url": "..."}]               对象数组，含 url 字段
- *  3) {"images": [...], ...}                         对象，含 images 字段
- *  4) {"data": [...], ...}                           对象，含 data 字段（兼容常见图床 API）
+ * 1) JSON 列表模式（mode=json）
+ *    支持以下 JSON 格式（自动识别）：
+ *      ["url1", "url2", ...]                          字符串数组
+ *      [{"url": "..."}, ...]                          对象数组，含 url 字段
+ *      {"images": [...], ...}                         对象，含 images 字段
+ *      {"data": [...], ...}                           对象，含 data 字段
+ *    数组元素如果是对象，会尝试 url / link / src / file / path / image_url 等字段。
  *
- * 其中数组元素如果是对象，会尝试 url / link / src / file / path / image_url 等字段。
+ * 2) 单图 URL 模式（mode=single，默认）
+ *    URL 直接返回一张图片（每次请求可能不同，如随机图 API https://t.alcy.cc/ycy）。
+ *    fetch() 返回包含该 URL 的单元素列表。
  */
 class ImageFetcher {
 
     private val client: OkHttpClient = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(20, TimeUnit.SECONDS)
+        .followRedirects(true)
         .build()
 
     /** 拉取并解析图片 URL 列表。失败抛异常。 */
-    fun fetch(url: String): List<String> {
+    fun fetch(url: String, mode: String = "single"): List<String> {
         require(url.isNotBlank()) { "URL 为空" }
+        return if (mode == "json") fetchJson(url) else listOf(url.trim())
+    }
 
+    /** 检测 URL 实际返回的是 JSON 还是图片，自动选模式。 */
+    fun detectMode(url: String): String {
+        require(url.isNotBlank()) { "URL 为空" }
         val request = Request.Builder()
             .url(url.trim())
-            .header("User-Agent", "TVToolbox/1.0 (Android TV Screensaver)")
+            .header("User-Agent", "TVToolbox/1.2 (Android TV Screensaver)")
+            .header("Accept", "*/*")
+            .head()
+            .build()
+        return try {
+            client.newCall(request).execute().use { resp ->
+                val ct = resp.header("Content-Type")?.lowercase() ?: ""
+                if (ct.contains("json")) "json" else "single"
+            }
+        } catch (_: Throwable) {
+            "single"
+        }
+    }
+
+    private fun fetchJson(url: String): List<String> {
+        val request = Request.Builder()
+            .url(url.trim())
+            .header("User-Agent", "TVToolbox/1.2 (Android TV Screensaver)")
             .header("Accept", "application/json, */*")
             .build()
 
