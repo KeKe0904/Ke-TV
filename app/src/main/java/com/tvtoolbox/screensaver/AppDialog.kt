@@ -272,18 +272,26 @@ object AppDialog {
         dialog.show()
 
         // TV：自动聚焦到第一个可聚焦元素（按钮或 RadioButton），方便遥控器立即操作
-        // 注意：若是输入框 dialog，让保存按钮先聚焦，避免立刻弹 IME 导致异常
-        // 若是单选对话框，优先聚焦当前已选中的 RadioButton（用户按上下键就能从当前位置开始）
+        // 关键修复（图床 URL 设置返回首页 bug 的真正根因）：
+        // 之前用 `it is TextView && it.isClickable` 选焦点目标，
+        // 但 **EditText 是 TextView 的子类**，且 EditText.isClickable 默认 true！
+        // 导致 TV 上 showInput 自动聚焦 EditText → 触发 IME → TV 无 IME 异常 → dialog 失败
+        // → 返回键被传给 Activity → finish() → "点了就回首页"
+        // 修复：TV 自动聚焦候选明确排除 EditText，优先聚焦到按钮（保存/取消）。
         dialog.window?.decorView?.post {
             val root = dialog.window?.decorView ?: return@post
             val focusable = ArrayList<View>()
             root.addFocusables(focusable, View.FOCUS_FORWARD)
-            // TV 上优先聚焦按钮（避免 EditText 触发 IME 异常）
-            // 若有 checked 的 RadioButton，优先聚焦它（单选对话框场景）
             val target = if (isTv) {
+                // TV 优先聚焦顺序：
+                // 1. checked RadioButton（单选对话框场景，用户按上下键从当前位置开始）
+                // 2. 可点击的 Button（保存/取消按钮，**排除 EditText** 避免 IME 异常）
+                // 3. 最后兜底：第一个可聚焦元素（但排除 EditText）
                 focusable.firstOrNull { (it as? RadioButton)?.isChecked == true }
-                    ?: focusable.firstOrNull { it is TextView && it.isClickable }
-                    ?: focusable.firstOrNull()
+                    ?: focusable.firstOrNull {
+                        it is TextView && it.isClickable && it !is android.widget.EditText
+                    }
+                    ?: focusable.firstOrNull { it !is android.widget.EditText }
             } else {
                 focusable.firstOrNull()
             }

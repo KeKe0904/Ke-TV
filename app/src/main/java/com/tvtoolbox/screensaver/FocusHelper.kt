@@ -52,8 +52,10 @@ object FocusHelper {
             view.setOnFocusChangeListener { v, hasFocus ->
                 if (hasFocus) {
                     v.background = ContextCompat.getDrawable(v.context, R.drawable.glass_card_focus_bg)
+                    // 放大 1.03x（从 1.04 调小，减少边缘卡片溢出量）
+                    // 配合 GridLayout padding 28dp，边缘卡片放大后不会触碰屏幕边缘
                     v.animate()
-                        .scaleX(1.04f).scaleY(1.04f)
+                        .scaleX(1.03f).scaleY(1.03f)
                         .setDuration(220)
                         .setInterpolator(OvershootInterpolator(1.2f))
                         .start()
@@ -193,9 +195,9 @@ object FocusHelper {
         } else if (event.action == KeyEvent.ACTION_UP &&
             (keyCode == KeyEvent.KEYCODE_DPAD_CENTER || keyCode == KeyEvent.KEYCODE_ENTER)
         ) {
-            // 抬起：回弹到 1.04x（焦点态），带 OvershootInterpolator 让回弹有弹性
+            // 抬起：回弹到 1.03x（焦点态），带 OvershootInterpolator 让回弹有弹性
             v.animate()
-                .scaleX(1.04f).scaleY(1.04f)
+                .scaleX(1.03f).scaleY(1.03f)
                 .setDuration(220)
                 .setInterpolator(OvershootInterpolator(1.4f))
                 .start()

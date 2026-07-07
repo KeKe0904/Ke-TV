@@ -16,14 +16,21 @@
     <dimen name="weather_desc_size">18sp</dimen>
     <dimen name="weather_padding">32dp</dimen>
 
-    <!-- 功能板块网格卡片 -->
-    <dimen name="func_card_padding">28dp</dimen>
-    <dimen name="func_card_margin">14dp</dimen>
-    <dimen name="func_card_radius">28dp</dimen>
-    <dimen name="func_icon_size">68dp</dimen>
-    <dimen name="func_icon_margin_bottom">18dp</dimen>
-    <dimen name="func_title_size">20sp</dimen>
-    <dimen name="func_desc_size">15sp</dimen>
+    <!-- 功能板块网格卡片
+         缩小卡片尺寸 + 加大 GridLayout padding：
+         - 卡片放大 1.04x 时，边缘卡片要不被屏幕边缘截断，
+           GridLayout padding 至少 = 卡片放大溢出量 + 安全余量
+         - func_card_margin 用作 GridLayout padding，给边缘留空间
+         - func_card_padding 缩小，让卡片本身更紧凑
+         - func_icon_size 缩小到 56dp（原 68dp），整体视觉更小
+    -->
+    <dimen name="func_card_padding">20dp</dimen>
+    <dimen name="func_card_margin">28dp</dimen>
+    <dimen name="func_card_radius">24dp</dimen>
+    <dimen name="func_icon_size">56dp</dimen>
+    <dimen name="func_icon_margin_bottom">14dp</dimen>
+    <dimen name="func_title_size">18sp</dimen>
+    <dimen name="func_desc_size">13sp</dimen>
 
     <!-- 容器水平内边距：大屏左右留白适中（避免电视两边大段空白） -->
     <dimen name="content_padding_h">32dp</dimen>

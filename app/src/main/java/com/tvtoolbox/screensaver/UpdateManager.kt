@@ -173,28 +173,37 @@ object UpdateManager {
 
         val downloadJob = scope.launch {
             val outcome = withContext(Dispatchers.IO) {
-                // 默认走 GitHub 代理：部分网络环境下 github.com 下载链接无法直连
-                val proxyUrl = GithubProxy.wrap(result.downloadUrl)
-                downloadApk(proxyUrl, targetFile) { read, total ->
-                    if (total > 0) {
-                        val percent = (read * 100 / total).toInt()
-                        val readStr = formatSize(read)
-                        val totalStr = formatSize(total)
-                        progressBar.post {
-                            // 首次拿到总大小，从 indeterminate 切到 determinate
-                            if (progressBar.isIndeterminate) {
-                                progressBar.isIndeterminate = false
+                // 依次尝试主代理 → 备代理 → 直连，任意一个成功即返回
+                // 用户网络环境无法预知，多代理重试是确保下载成功的最稳妥方案
+                val candidateUrls = GithubProxy.wrapAll(result.downloadUrl)
+                var lastResult: DownloadResult = DownloadResult.Error("无候选 URL")
+                for ((idx, url) in candidateUrls.withIndex()) {
+                    Log.d(TAG, "尝试下载 [${idx + 1}/${candidateUrls.size}]: $url")
+                    lastResult = downloadApk(url, targetFile) { read, total ->
+                        if (total > 0) {
+                            val percent = (read * 100 / total).toInt()
+                            val readStr = formatSize(read)
+                            val totalStr = formatSize(total)
+                            progressBar.post {
+                                // 首次拿到总大小，从 indeterminate 切到 determinate
+                                if (progressBar.isIndeterminate) {
+                                    progressBar.isIndeterminate = false
+                                }
+                                progressBar.progress = percent
+                                progressText.text = activity.getString(
+                                    R.string.update_downloading_message,
+                                    percent,
+                                    readStr,
+                                    totalStr
+                                )
                             }
-                            progressBar.progress = percent
-                            progressText.text = activity.getString(
-                                R.string.update_downloading_message,
-                                percent,
-                                readStr,
-                                totalStr
-                            )
                         }
                     }
+                    if (lastResult is DownloadResult.Success) break
+                    // 失败：清理半成品文件，准备试下一个 URL
+                    if (targetFile.exists()) targetFile.delete()
                 }
+                lastResult
             }
 
             // 关闭进度对话框

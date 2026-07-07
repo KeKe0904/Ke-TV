@@ -41,8 +41,8 @@ object UpdateChecker {
     /**
      * 检查更新。失败抛异常，调用方自行处理。
      *
-     * 注意：API 请求默认走 GitHub 代理（[GithubProxy.wrap]），
-     * 因为部分网络环境下 api.github.com 也无法访问。
+     * 网络策略：依次尝试主代理 → 备代理 → 直连，任意一个成功即返回。
+     * 一个代理失败（超时 / 非 2xx / 非 GitHub JSON）就换下一个。
      */
     fun check(context: Context): Result {
         val currentVersionName = getVersionName(context)
@@ -50,57 +50,67 @@ object UpdateChecker {
         // 之前 bug：parseVersionCode("v1.6.1")=10601 与 versionCode=11 比较，永远大于，永远提示有更新
         val currentVersionParsed = parseVersionCode(currentVersionName)
 
-        // 默认走 GitHub 代理：部分网络环境无法直连 api.github.com
-        val apiUrl = GithubProxy.wrap(RELEASES_API)
-        val request = Request.Builder()
-            .url(apiUrl)
-            .header("Accept", "application/vnd.github+json")
-            .header("User-Agent", "Ke-TV-UpdateChecker/$currentVersionName")
-            .build()
+        // 依次尝试主代理 → 备代理 → 直连
+        val apiUrls = GithubProxy.wrapAll(RELEASES_API)
+        var lastError: Throwable? = null
+        for (apiUrl in apiUrls) {
+            try {
+                val request = Request.Builder()
+                    .url(apiUrl)
+                    .header("Accept", "application/vnd.github+json")
+                    .header("User-Agent", "Ke-TV-UpdateChecker/$currentVersionName")
+                    .build()
 
-        client.newCall(request).execute().use { resp ->
-            if (!resp.isSuccessful) {
-                throw RuntimeException("HTTP ${resp.code}")
-            }
-            val body = resp.body?.string() ?: throw RuntimeException("响应为空")
-            val releases = gson.fromJson(body, Array<JsonObject>::class.java)
-                ?: throw RuntimeException("解析失败")
+                client.newCall(request).execute().use { resp ->
+                    if (!resp.isSuccessful) {
+                        throw RuntimeException("HTTP ${resp.code}")
+                    }
+                    val body = resp.body?.string() ?: throw RuntimeException("响应为空")
+                    val releases = gson.fromJson(body, Array<JsonObject>::class.java)
+                        ?: throw RuntimeException("解析失败")
 
-            if (releases.isEmpty()) {
-                throw RuntimeException("没有发布版本")
-            }
+                    if (releases.isEmpty()) {
+                        throw RuntimeException("没有发布版本")
+                    }
 
-            // GitHub 默认按创建时间倒序，取第一个即最新
-            val latest = releases[0]
-            val tagName = latest.get("tag_name")?.asString ?: ""
-            val latestVersionCode = parseVersionCode(tagName)
-            val isPrerelease = latest.get("prerelease")?.asBoolean ?: false
-            val releaseNotes = latest.get("body")?.asString ?: ""
-            val latestVersionName = tagName.trimStart('v', 'V')
+                    // GitHub 默认按创建时间倒序，取第一个即最新
+                    val latest = releases[0]
+                    val tagName = latest.get("tag_name")?.asString ?: ""
+                    val latestVersionCode = parseVersionCode(tagName)
+                    val isPrerelease = latest.get("prerelease")?.asBoolean ?: false
+                    val releaseNotes = latest.get("body")?.asString ?: ""
+                    val latestVersionName = tagName.trimStart('v', 'V')
 
-            // 查找第一个 APK asset 作为下载链接
-            val assets = latest.getAsJsonArray("assets") ?: emptyList()
-            var downloadUrl = "https://github.com/KeKe0904/Ke-TV/releases/tag/$tagName"
-            for (asset in assets) {
-                val obj = asset.asJsonObject
-                val name = obj.get("name")?.asString ?: ""
-                if (name.endsWith(".apk", ignoreCase = true)) {
-                    downloadUrl = obj.get("browser_download_url")?.asString ?: downloadUrl
-                    break
+                    // 查找第一个 APK asset 作为下载链接
+                    val assets = latest.getAsJsonArray("assets") ?: emptyList()
+                    var downloadUrl = "https://github.com/KeKe0904/Ke-TV/releases/tag/$tagName"
+                    for (asset in assets) {
+                        val obj = asset.asJsonObject
+                        val name = obj.get("name")?.asString ?: ""
+                        if (name.endsWith(".apk", ignoreCase = true)) {
+                            downloadUrl = obj.get("browser_download_url")?.asString ?: downloadUrl
+                            break
+                        }
+                    }
+
+                    Log.d(TAG, "current=$currentVersionParsed latest=$latestVersionCode tag=$tagName apiUrl=$apiUrl")
+
+                    return Result(
+                        hasUpdate = latestVersionCode > currentVersionParsed,
+                        latestVersion = latestVersionName,
+                        currentVersion = currentVersionName,
+                        downloadUrl = downloadUrl,
+                        releaseNotes = releaseNotes,
+                        isPrerelease = isPrerelease
+                    )
                 }
+            } catch (t: Throwable) {
+                Log.w(TAG, "API 请求失败：$apiUrl — ${t.message}")
+                lastError = t
+                // 继续尝试下一个候选 URL
             }
-
-            Log.d(TAG, "current=$currentVersionParsed latest=$latestVersionCode tag=$tagName")
-
-            return Result(
-                hasUpdate = latestVersionCode > currentVersionParsed,
-                latestVersion = latestVersionName,
-                currentVersion = currentVersionName,
-                downloadUrl = downloadUrl,
-                releaseNotes = releaseNotes,
-                isPrerelease = isPrerelease
-            )
         }
+        throw lastError ?: RuntimeException("所有代理均失败")
     }
 
     private fun getVersionName(context: Context): String {
