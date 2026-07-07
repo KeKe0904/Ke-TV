@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#FFB7D5">
+    <title>Ke-TV 浏览器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            /* 二次元风格：默认粉色渐变 fallback，图床加载后覆盖 */
+            background-color: #FFE0F0;
+            background-image: url('https://t.alcy.cc/ycy');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* 暗化遮罩，让搜索框更突出，文字更易读 */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at center, rgba(40,20,60,0.18) 0%, rgba(40,20,60,0.45) 100%);
+            z-index: 1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            width: 90%;
+            max-width: 720px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .logo {
+            margin-bottom: 32px;
+        }
+
+        .logo-title {
+            font-size: 56px;
+            font-weight: 200;
+            letter-spacing: 8px;
+            color: #FFFFFF;
+            text-shadow: 0 2px 16px rgba(255, 105, 180, 0.8), 0 0 28px rgba(191, 90, 242, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .logo-subtitle {
+            font-size: 13px;
+            font-weight: 300;
+            letter-spacing: 6px;
+            color: rgba(255, 255, 255, 0.92);
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+        }
+
+        .logo-heart {
+            display: inline-block;
+            color: #FF6FA3;
+            margin: 0 6px;
+            text-shadow: 0 0 12px rgba(255, 105, 180, 0.9);
+        }
+
+        .search-form {
+            display: flex;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 999px;
+            padding: 6px 6px 6px 28px;
+            box-shadow: 0 10px 36px rgba(255, 105, 180, 0.28), 0 2px 8px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.65);
+            align-items: center;
+        }
+
+        .search-icon {
+            width: 22px;
+            height: 22px;
+            margin-right: 12px;
+            color: #C850A8;
+            opacity: 0.7;
+            flex-shrink: 0;
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 16px;
+            color: #4A2D5C;
+            padding: 14px 0;
+            font-family: inherit;
+            min-width: 0;
+        }
+
+        .search-input::placeholder {
+            color: rgba(74, 45, 92, 0.5);
+        }
+
+        .search-btn {
+            background: linear-gradient(135deg, #FF6FA3 0%, #BF5AF2 100%);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 4px;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            font-family: inherit;
+            box-shadow: 0 4px 16px rgba(191, 90, 242, 0.35);
+            flex-shrink: 0;
+        }
+
+        .search-btn:active {
+            transform: scale(0.96);
+            box-shadow: 0 2px 8px rgba(191, 90, 242, 0.4);
+        }
+
+        .hint {
+            margin-top: 22px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.78);
+            letter-spacing: 2px;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+        }
+
+        .quick-links {
+            margin-top: 36px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .quick-link {
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 10px 18px;
+            border-radius: 18px;
+            font-size: 13px;
+            color: #4A2D5C;
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            transition: all 0.18s ease;
+            font-weight: 400;
+        }
+
+        .quick-link:hover {
+            background: rgba(255, 255, 255, 0.92);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(255, 105, 180, 0.25);
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 16px;
+            left: 0;
+            right: 0;
+            z-index: 2;
+            text-align: center;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 1px;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+        }
+
+        /* TV / 大屏：放大字号 */
+        @media (min-width: 820px) {
+            .logo-title {
+                font-size: 76px;
+                letter-spacing: 12px;
+            }
+            .container {
+                max-width: 800px;
+            }
+            .search-input {
+                font-size: 18px;
+                padding: 16px 0;
+            }
+            .search-btn {
+                padding: 14px 32px;
+                font-size: 15px;
+            }
+            .quick-link {
+                font-size: 14px;
+                padding: 11px 20px;
+            }
+        }
+
+        /* TV 焦点 */
+        .search-input:focus,
+        .search-btn:focus,
+        .quick-link:focus {
+            outline: 2px solid #FF6FA3;
+            outline-offset: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <div class="logo-title">Ke<span class="logo-heart">♥</span>TV</div>
+            <div class="logo-subtitle">B R O W S E R &nbsp;·&nbsp; 二 次 元 工 具 箱</div>
+        </div>
+
+        <form class="search-form" id="searchForm" action="https://www.bing.com/search" method="GET" target="_self">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+            <input type="text" class="search-input" name="q" placeholder="必应搜索或输入网址" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+            <button type="submit" class="search-btn">搜索</button>
+        </form>
+
+        <div class="hint">输入关键词 → 必应搜索 · 输入网址 → 直接跳转</div>
+
+        <div class="quick-links">
+            <a class="quick-link" href="https://www.bing.com">必应</a>
+            <a class="quick-link" href="https://www.bilibili.com">哔哩哔哩</a>
+            <a class="quick-link" href="https://github.com">GitHub</a>
+            <a class="quick-link" href="https://www.zhihu.com">知乎</a>
+            <a class="quick-link" href="https://t.alcy.cc/ycy">图床</a>
+        </div>
+    </div>
+
+    <div class="footer">背景图：t.alcy.cc · 必应搜索</div>
+
+    <script>
+        // 启动后自动聚焦搜索框
+        window.addEventListener('load', function() {
+            var input = document.querySelector('.search-input');
+            if (input) {
+                setTimeout(function() { input.focus(); }, 200);
+            }
+        });
+
+        // 拦截表单提交：
+        // - 看起来像 URL → 直接跳转（form 不会处理）
+        // - 否则按 form 默认行为走 bing.com/search?q=...
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            var input = document.querySelector('.search-input');
+            var val = (input.value || '').trim();
+            if (!val) {
+                e.preventDefault();
+                return;
+            }
+            if (isUrl(val)) {
+                e.preventDefault();
+                window.location.href = normalizeUrl(val);
+            }
+        });
+
+        function isUrl(s) {
+            if (s.indexOf(' ') >= 0) return false;
+            if (/^https?:\/\//i.test(s)) return true;
+            if (/^about:/i.test(s)) return true;
+            if (s === 'localhost' || /^\d{1,3}(\.\d{1,3}){3}(:\d+)?$/.test(s)) return true;
+            var idx = s.indexOf('.');
+            if (idx < 0 || idx === s.length - 1) return false;
+            var host = s.split('/')[0].split('?')[0];
+            var dotIdx = host.indexOf('.');
+            if (dotIdx < 0) return false;
+            var tail = host.substring(dotIdx + 1);
+            return /^[A-Za-z]{2,}(:\d+)?$/.test(tail);
+        }
+
+        function normalizeUrl(s) {
+            if (/^https?:\/\//i.test(s) || /^about:/i.test(s)) return s;
+            return 'https://' + s;
+        }
+    </script>
+</body>
+</html>

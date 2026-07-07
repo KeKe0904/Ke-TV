@@ -26,6 +26,7 @@ import com.google.android.material.appbar.MaterialToolbar
  *
  * 实现：
  * - 基于 Android 系统 WebView（底层是 Chrome / Chromium 内核）
+ * - 起始页：本地 assets/browser_home.html，二次元风格 + ycy 图床背景 + 中央搜索框
  * - 地址栏：URL 直接跳转 / 关键词搜索（Bing）
  * - 后退 / 前进 / 刷新 / 停止 / 主页
  * - 加载进度条
@@ -48,10 +49,6 @@ class BrowserActivity : AppCompatActivity() {
 
     /** 当前是否正在加载。true 时刷新按钮显示为停止。 */
     private var isLoading = false
-
-    /** 默认主页：必应搜索首页。 */
-    private val homeUrl: String
-        get() = getString(R.string.browser_homepage)
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -99,9 +96,9 @@ class BrowserActivity : AppCompatActivity() {
             }
         }
 
-        // 首次加载主页
+        // 首次加载起始页（本地 HTML，二次元风格搜索起始页）
         if (savedInstanceState == null) {
-            loadUrl(homeUrl)
+            loadHomePage()
         } else {
             savedInstanceState.getBundle(KEY_STATE)?.let { webView.restoreState(it) }
         }
@@ -132,16 +129,26 @@ class BrowserActivity : AppCompatActivity() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
                 setLoading(true)
-                // 同步地址栏到当前 URL（如果是跳转过来的）
-                if (url != null && url != etUrl.text.toString()) {
-                    etUrl.setText(url)
+                // 同步地址栏到当前 URL：
+                // - 起始页（file:///android_asset/）：清空地址栏，让 hint 显示
+                // - 其他：显示当前 URL
+                if (url != null && !url.startsWith(HOME_PAGE_URL_PREFIX)) {
+                    if (url != etUrl.text.toString()) {
+                        etUrl.setText(url)
+                    }
+                } else {
+                    etUrl.setText("")
                 }
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 setLoading(false)
-                url?.let { etUrl.setText(it) }
+                if (url != null && !url.startsWith(HOME_PAGE_URL_PREFIX)) {
+                    etUrl.setText(url)
+                } else {
+                    etUrl.setText("")
+                }
                 updateNavButtons()
             }
 
@@ -203,7 +210,7 @@ class BrowserActivity : AppCompatActivity() {
             if (isLoading) webView.stopLoading() else webView.reload()
         }
         btnHome.setOnClickListener {
-            loadUrl(homeUrl)
+            loadHomePage()
         }
         btnGo.setOnClickListener {
             navigateFromAddressBar()
@@ -225,6 +232,13 @@ class BrowserActivity : AppCompatActivity() {
         btnForward.isEnabled = webView.canGoForward()
         btnBack.alpha = if (btnBack.isEnabled) 1.0f else 0.4f
         btnForward.alpha = if (btnForward.isEnabled) 1.0f else 0.4f
+    }
+
+    /** 加载浏览器起始页（本地二次元风格搜索起始页）。 */
+    private fun loadHomePage() {
+        webView.loadUrl(HOME_PAGE_URL)
+        etUrl.setText("")
+        toolbar.title = getString(R.string.browser_title)
     }
 
     /** 解析地址栏输入并加载：URL 直接跳转 / 关键词走搜索引擎。 */
@@ -316,5 +330,9 @@ class BrowserActivity : AppCompatActivity() {
 
     private companion object {
         private const val KEY_STATE = "webview_state"
+        /** 起始页 URL：本地 assets 中的 HTML（二次元风格 + ycy 图床背景）。 */
+        private const val HOME_PAGE_URL = "file:///android_asset/browser_home.html"
+        /** 用于识别"当前是否在起始页"的前缀。 */
+        private const val HOME_PAGE_URL_PREFIX = "file:///android_asset/browser_home"
     }
 }
