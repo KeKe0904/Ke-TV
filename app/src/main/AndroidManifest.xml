@@ -9,6 +9,21 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
+    <!--
+        v1.7.5：系统级屏保设置（核心权限）
+        ============================================
+        此权限为系统级权限，普通安装不授予，必须用户通过 adb 主动授予：
+        adb shell pm grant com.tvtoolbox.screensaver android.permission.WRITE_SECURE_SETTINGS
+
+        授予后 APP 可直接修改系统屏保配置：
+        - screensaver_enabled = 1
+        - screensaver_components = 本应用 PhotoDreamService
+        - screensaver_timeout = 用户设置的等待时间
+
+        这是无需 root 的最强方案，适用于小米 TV / 红米 TV 等任何 Android TV。
+    -->
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+
     <!-- TV 可选：让 APP 同时能装到 TV 和手机上 -->
     <uses-feature android:name="android.software.leanback" android:required="false" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />

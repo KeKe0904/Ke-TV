@@ -304,28 +304,86 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     /**
-     * 引导用户把本应用设为系统屏保（v1.7.4 新增）。
+     * 引导用户把本应用设为系统屏保（v1.7.4 新增，v1.7.5 强化）。
      *
      * 小米 / 红米 TV 等电视系统通常不允许 APP 直接修改系统屏保配置，
-     * 必须用户在系统设置中手动选中本应用。这里：
-     * 1. 跳转到系统屏保设置页（如果可达）
-     * 2. 显示引导对话框，告诉用户如何选中本应用
+     * v1.7.5 新增「强制修改系统底层屏保」方案：
+     *
+     * 1. 检查是否有 WRITE_SECURE_SETTINGS 权限
+     *    - 有 → 直接调用 setAsSystemDream 一键设为系统屏保
+     *    - 无 → 显示 adb 授权引导对话框
+     * 2. 用户在电脑用 adb 授予权限后，回到 APP 点击「一键设置」
+     * 3. APP 直接修改 Settings.Secure.screensaver_* 配置项
+     *
+     * 这是无需 root 的最强方案，永久生效。
      */
     private fun guideSetAsSystemDream() {
-        // 先显示引导对话框
+        if (SystemDreamHelper.hasSecureSettingsPermission(this)) {
+            // 已有权限：直接显示一键设置对话框
+            showOneClickSetDreamDialog()
+        } else {
+            // 无权限：显示 adb 引导对话框
+            showAdbGuideDialog()
+        }
+    }
+
+    /**
+     * 已获得 WRITE_SECURE_SETTINGS 权限时显示的对话框。
+     * 用户点击「一键设为系统屏保」直接修改 Settings.Secure。
+     */
+    private fun showOneClickSetDreamDialog() {
+        val isCurrent = SystemDreamHelper.isCurrentSystemDream(this)
+        val isEnabled = SystemDreamHelper.isScreenSaverEnabled(this)
+        val timeout = SystemDreamHelper.getScreenSaverTimeout(this)
+        val timeoutText = if (timeout > 0) "${timeout / 1000 / 60} 分钟" else "未设置"
+        val statusText = buildString {
+            append("当前状态：\n")
+            append("· 系统屏保：").append(if (isEnabled) "已启用" else "未启用").append("\n")
+            append("· 屏保组件：").append(if (isCurrent) "✓ 已设为本应用" else "✗ 未设为本应用").append("\n")
+            append("· 等待时间：").append(timeoutText)
+        }
+
         showAppMessage(
-            title = getString(R.string.dream_guide_title),
-            message = getString(R.string.dream_guide_message),
-            positiveText = getString(R.string.dream_guide_open_settings),
+            title = getString(R.string.dream_oneclick_title),
+            message = statusText,
+            positiveText = getString(R.string.dream_oneclick_set),
             onPositive = {
                 val ok = try {
-                    DreamSettingsHelper.openDreamPicker(this)
+                    SystemDreamHelper.setAsSystemDream(this, 5 * 60 * 1000)
                 } catch (_: Throwable) {
                     false
                 }
-                if (!ok) {
-                    // 兜底：直接预览本应用屏保
-                    try { DreamSettingsHelper.triggerScreensaverNow(this) } catch (_: Throwable) {}
+                if (ok) {
+                    showAppMessage(
+                        title = getString(R.string.dream_oneclick_success_title),
+                        message = getString(R.string.dream_oneclick_success_message)
+                    )
+                } else {
+                    Toast.makeText(this, R.string.dream_oneclick_failed, Toast.LENGTH_LONG).show()
+                }
+            },
+            negativeText = getString(R.string.dream_guide_preview_now),
+            onNegative = {
+                try { DreamSettingsHelper.triggerScreensaverNow(this) } catch (_: Throwable) {}
+            }
+        )
+    }
+
+    /**
+     * 无 WRITE_SECURE_SETTINGS 权限时显示的对话框。
+     * 引导用户用电脑 adb 授予权限，然后回到 APP 点击「已授权，重试」。
+     */
+    private fun showAdbGuideDialog() {
+        showAppMessage(
+            title = getString(R.string.dream_adb_guide_title),
+            message = getString(R.string.dream_adb_guide_message),
+            positiveText = getString(R.string.dream_adb_authorized),
+            onPositive = {
+                // 用户点击「已授权，重试」→ 重新检查权限
+                if (SystemDreamHelper.hasSecureSettingsPermission(this)) {
+                    showOneClickSetDreamDialog()
+                } else {
+                    Toast.makeText(this, R.string.dream_adb_still_no_permission, Toast.LENGTH_LONG).show()
                 }
             },
             negativeText = getString(R.string.dream_guide_preview_now),

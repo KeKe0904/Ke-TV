@@ -117,9 +117,21 @@
     <string name="dream_guide_message">要让系统屏保使用本应用，请在系统屏保设置中选中「Ke-TV」。\n\n操作步骤：\n1. 点击「打开系统设置」\n2. 找到「屏保」或「屏幕保护程序」\n3. 选中「Ke-TV」作为屏保\n4. 设置等待时间（如 5 分钟）\n\n如果系统不支持，可点击「立即预览」直接查看本应用屏保效果。</string>
     <string name="dream_guide_open_settings">打开系统设置</string>
     <string name="dream_guide_preview_now">立即预览</string>
+
+    <!-- v1.7.5：一键强制设为系统屏保（adb 授权方案） -->
+    <string name="dream_oneclick_title">一键设为系统屏保</string>
+    <string name="dream_oneclick_set">一键设为系统屏保</string>
+    <string name="dream_oneclick_success_title">设置成功</string>
+    <string name="dream_oneclick_success_message">✓ 已把本应用设为系统屏保\n· 屏保已启用\n· 组件：Ke-TV PhotoDreamService\n· 等待时间：5 分钟\n\n现在等待 5 分钟无操作即可触发屏保，或重启 TV 立即生效。</string>
+    <string name="dream_oneclick_failed">设置失败：权限被拒绝或系统不支持</string>
+
+    <string name="dream_adb_guide_title">需要授权（adb 方式）</string>
+    <string name="dream_adb_guide_message">本应用需要「WRITE_SECURE_SETTINGS」权限才能直接修改系统屏保配置。此权限普通安装不授予，必须用电脑 adb 主动授予。\n\n操作步骤：\n\n1. 在 TV 设置里启用「开发者选项」+「USB 调试」\n\n2. 电脑安装 adb 工具，与 TV 连同一 WiFi\n\n3. 电脑执行（替换 TV_IP 为电视 IP）：\n   adb connect TV_IP:5555\n   adb shell pm grant com.tvtoolbox.screensaver android.permission.WRITE_SECURE_SETTINGS\n\n4. 回到本应用点击「已授权，重试」\n\n授权后即可一键强制设为系统屏保，永久生效。\n\n如不想折腾，可点击「立即预览」直接查看屏保效果。</string>
+    <string name="dream_adb_authorized">已授权，重试</string>
+    <string name="dream_adb_still_no_permission">仍未获得权限：请确认已执行 adb grant 命令</string>
     <string name="feature_coming_soon">「%1$s」功能开发中，敬请期待</string>
 
-    <string name="about_summary">Ke-TV v1.7.4 · 测试版本</string>
+    <string name="about_summary">Ke-TV v1.7.5 · 测试版本</string>
     <string name="about_github_url">https://github.com/KeKe0904/Ke-TV</string>
 
     <!-- 对话框 -->
