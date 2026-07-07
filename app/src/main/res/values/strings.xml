@@ -111,7 +111,7 @@
     <string name="dream_settings_fallback">系统屏保设置不可用\n你可以用「立即进入屏保」测试</string>
     <string name="feature_coming_soon">「%1$s」功能开发中，敬请期待</string>
 
-    <string name="about_summary">Ke-TV v1.6.6 · 测试版本</string>
+    <string name="about_summary">Ke-TV v1.6.7 · 测试版本</string>
     <string name="about_github_url">https://github.com/KeKe0904/Ke-TV</string>
 
     <!-- 对话框 -->

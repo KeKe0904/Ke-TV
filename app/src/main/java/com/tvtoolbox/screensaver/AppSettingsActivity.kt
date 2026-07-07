@@ -1,6 +1,7 @@
 package com.tvtoolbox.screensaver
 
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -54,10 +55,34 @@ class AppSettingsActivity : AppCompatActivity() {
     }
 
     private fun bindRows() {
-        // 主题模式
-        findViewById<View>(R.id.rowThemeMode).also {
-            it.setOnClickListener { showThemeModeDialog() }
-            FocusHelper.setupFocus(it)
+        val isTv = FocusHelper.isTv(this)
+
+        // 主题模式：TV 上按左右键直接切换值
+        findViewById<View>(R.id.rowThemeMode).also { row ->
+            row.setOnClickListener { showThemeModeDialog() }
+            FocusHelper.setupFocus(row)
+            if (isTv) {
+                row.setOnKeyListener { v, keyCode, event ->
+                    // 保留 setupFocus 的 D-pad 确认键按压反馈
+                    FocusHelper.handleConfirmKeyFeedback(v, keyCode, event)
+                    if (event.action == KeyEvent.ACTION_UP &&
+                        (keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT)
+                    ) {
+                        val cur = Prefs.themeMode(this)
+                        val idx = themeModeValues.indexOf(cur).coerceAtLeast(0)
+                        val newIdx = if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                            (idx + 1) % themeModeValues.size
+                        } else {
+                            (idx - 1 + themeModeValues.size) % themeModeValues.size
+                        }
+                        Prefs.setThemeMode(this, themeModeValues[newIdx])
+                        ThemeHelper.apply(this)
+                        recreate()
+                        return@setOnKeyListener true
+                    }
+                    false
+                }
+            }
         }
 
         // 软件更新

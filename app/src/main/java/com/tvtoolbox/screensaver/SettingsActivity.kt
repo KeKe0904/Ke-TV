@@ -1,6 +1,7 @@
 package com.tvtoolbox.screensaver
 
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -59,39 +60,116 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun bindRows() {
-        // 图床类型
-        findViewById<View>(R.id.rowSourceMode).also {
-            it.setOnClickListener { showSourceModeDialog() }
-            FocusHelper.setupFocus(it)
+        val isTv = FocusHelper.isTv(this)
+
+        // 图床类型：TV 上按左右键直接在值之间循环切换，无需打开对话框
+        findViewById<View>(R.id.rowSourceMode).also { row ->
+            row.setOnClickListener { showSourceModeDialog() }
+            FocusHelper.setupFocus(row)
+            if (isTv) {
+                row.setOnKeyListener { v, keyCode, event ->
+                    // 保留 setupFocus 的 D-pad 确认键按压反馈
+                    FocusHelper.handleConfirmKeyFeedback(v, keyCode, event)
+                    if (event.action == KeyEvent.ACTION_UP &&
+                        (keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT)
+                    ) {
+                        val cur = Prefs.sourceMode(this)
+                        val idx = sourceModeValues.indexOf(cur).coerceAtLeast(0)
+                        val newIdx = if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                            (idx + 1) % sourceModeValues.size
+                        } else {
+                            (idx - 1 + sourceModeValues.size) % sourceModeValues.size
+                        }
+                        Prefs.setSourceMode(this, sourceModeValues[newIdx])
+                        refreshUi()
+                        return@setOnKeyListener true
+                    }
+                    false
+                }
+            }
         }
-        // 图床 URL
+
+        // 图床 URL：TV 上也保留点击弹出对话框（URL 需要输入），但优化了 dialog 焦点
         findViewById<View>(R.id.rowImageUrl).also {
             it.setOnClickListener { showUrlDialog() }
             FocusHelper.setupFocus(it)
         }
-        // 切换间隔
-        findViewById<View>(R.id.rowInterval).also {
-            it.setOnClickListener { showIntervalDialog() }
-            FocusHelper.setupFocus(it)
+
+        // 切换间隔：TV 上按左右键直接增减
+        findViewById<View>(R.id.rowInterval).also { row ->
+            row.setOnClickListener { showIntervalDialog() }
+            FocusHelper.setupFocus(row)
+            if (isTv) {
+                row.setOnKeyListener { v, keyCode, event ->
+                    FocusHelper.handleConfirmKeyFeedback(v, keyCode, event)
+                    if (event.action == KeyEvent.ACTION_UP &&
+                        (keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT)
+                    ) {
+                        val cur = Prefs.intervalSeconds(this)
+                        val idx = intervalValues.indexOfFirst { it.toIntOrNull() == cur }.coerceAtLeast(0)
+                        val newIdx = if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                            (idx + 1).coerceAtMost(intervalValues.size - 1)
+                        } else {
+                            (idx - 1).coerceAtLeast(0)
+                        }
+                        val newSeconds = intervalValues[newIdx].toIntOrNull() ?: cur
+                        Prefs.setIntervalSeconds(this, newSeconds)
+                        refreshUi()
+                        return@setOnKeyListener true
+                    }
+                    false
+                }
+            }
         }
-        // 随机顺序：点击卡片切换开关
-        findViewById<View>(R.id.rowRandom).also {
-            it.setOnClickListener {
+
+        // 随机顺序：点击切换开关
+        findViewById<View>(R.id.rowRandom).also { row ->
+            row.setOnClickListener {
                 val cur = Prefs.randomOrder(this)
                 Prefs.setRandomOrder(this, !cur)
                 refreshUi()
             }
-            FocusHelper.setupFocus(it)
+            FocusHelper.setupFocus(row)
+            if (isTv) {
+                row.setOnKeyListener { v, keyCode, event ->
+                    FocusHelper.handleConfirmKeyFeedback(v, keyCode, event)
+                    if (event.action == KeyEvent.ACTION_UP &&
+                        (keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT)
+                    ) {
+                        val cur = Prefs.randomOrder(this)
+                        Prefs.setRandomOrder(this, !cur)
+                        refreshUi()
+                        return@setOnKeyListener true
+                    }
+                    false
+                }
+            }
         }
+
         // Ken Burns
-        findViewById<View>(R.id.rowKenBurns).also {
-            it.setOnClickListener {
+        findViewById<View>(R.id.rowKenBurns).also { row ->
+            row.setOnClickListener {
                 val cur = Prefs.kenBurns(this)
                 Prefs.setKenBurns(this, !cur)
                 refreshUi()
             }
-            FocusHelper.setupFocus(it)
+            FocusHelper.setupFocus(row)
+            if (isTv) {
+                row.setOnKeyListener { v, keyCode, event ->
+                    FocusHelper.handleConfirmKeyFeedback(v, keyCode, event)
+                    if (event.action == KeyEvent.ACTION_UP &&
+                        (keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT)
+                    ) {
+                        val cur = Prefs.kenBurns(this)
+                        Prefs.setKenBurns(this, !cur)
+                        refreshUi()
+                        return@setOnKeyListener true
+                    }
+                    false
+                }
+            }
         }
+
         // 测试连通性
         findViewById<View>(R.id.rowTest).also {
             it.setOnClickListener { doTest() }

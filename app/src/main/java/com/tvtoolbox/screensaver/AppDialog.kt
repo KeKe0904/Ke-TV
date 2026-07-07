@@ -83,6 +83,7 @@ object AppDialog {
      * @param onSelected 选择回调（传入新选中项索引）
      * @param positiveText 确认按钮文案
      * @param negativeText 取消按钮文案
+     * @param instantApply true 时（TV 默认）：选中即应用并关闭对话框，无需点确认按钮
      */
     fun showSingleChoice(
         context: Context,
@@ -91,12 +92,46 @@ object AppDialog {
         checkedIndex: Int,
         onSelected: (Int) -> Unit,
         positiveText: CharSequence? = context.getString(R.string.dialog_ok),
-        negativeText: CharSequence? = context.getString(R.string.dialog_cancel)
+        negativeText: CharSequence? = context.getString(R.string.dialog_cancel),
+        instantApply: Boolean = FocusHelper.isTv(context)
     ): Dialog {
         val (view, radioGroup) = createChoiceListView(context, entries, checkedIndex)
         var selected = checkedIndex
+        // instantApply 模式（TV 默认）：D-pad 上下移动焦点时，焦点落到 RadioButton 立即应用并关闭
+        // 这是 TV 体验简化：用户按上下方向键直接切换值，无需再按"确认"
+        if (instantApply) {
+            for (i in 0 until radioGroup.childCount) {
+                val child = radioGroup.getChildAt(i) as? RadioButton ?: continue
+                child.setOnFocusChangeListener { v, hasFocus ->
+                    if (hasFocus && v is RadioButton) {
+                        val idx = v.id - 1
+                        if (idx != selected) {
+                            selected = idx
+                            onSelected(selected.coerceIn(0, entries.size - 1))
+                            v.postDelayed({
+                                (radioGroup.tag as? Dialog)?.dismiss()
+                            }, 180) // 让用户看到选中态视觉反馈
+                        }
+                    }
+                }
+            }
+            // instantApply 模式不需要确认按钮，只需取消按钮
+            return createAndShow(
+                context = context,
+                title = title,
+                contentView = view,
+                positiveText = null,
+                onPositive = null,
+                negativeText = negativeText,
+                onNegative = null,
+                cancelable = true
+            ).also { dialog ->
+                radioGroup.tag = dialog
+            }
+        }
+
+        // 普通模式（手机端）：选项目 → 按确认按钮才应用
         radioGroup.setOnCheckedChangeListener { _, id ->
-            // id 是 1-based 索引
             selected = id - 1
         }
         return createAndShow(
@@ -140,12 +175,23 @@ object AppDialog {
             onNegative = null,
             cancelable = true
         )
-        // 自动聚焦输入框并弹键盘
-        editText.requestFocus()
-        editText.postDelayed({
-            (context.getSystemService(Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager)
-                .showSoftInput(editText, 0)
-        }, 200)
+        // 仅在手机端自动聚焦输入框并弹软键盘
+        // TV 上 requestFocus + showSoftInput 会触发不存在 IME 的异常，
+        // 导致 dialog 显示失败或被系统回收 → 用户感觉"点了就回首页"
+        if (!FocusHelper.isTv(context)) {
+            try {
+                editText.requestFocus()
+                editText.postDelayed({
+                    (context.getSystemService(Context.INPUT_METHOD_SERVICE)
+                        as android.view.inputmethod.InputMethodManager)
+                        .showSoftInput(editText, 0)
+                }, 200)
+            } catch (_: Throwable) {
+                // 即使 IME 启动失败也不影响 dialog 显示
+            }
+        }
+        // TV：默认聚焦到「保存」按钮，用户按 D-pad 上下到输入框才聚焦输入框
+        // （此时系统的 IME 会被自然触发，不会异常）
         return dialog
     }
 
@@ -208,31 +254,60 @@ object AppDialog {
             setGravity(Gravity.CENTER)
         }
 
-        // TV：监听 D-pad 中央键（KEYCODE_DPAD_CENTER）和回车键，触发现焦点的按钮点击
-        // 部分电视上 Dialog 默认不消费这些键，导致无效。
+        // TV 关键修复：
+        // 1. D-pad 中央键 / 回车键 → 触发现焦点的按钮点击
+        // 2. 返回键 → 直接 dismiss dialog，避免 IME 异常时返回键被传给 Activity 导致 finish
+        //    （这是"点击图床 URL 设置就回首页"的核心原因）
+        val isTv = FocusHelper.isTv(context)
         dialog.setOnKeyListener { _, keyCode, event ->
-            if (event.action == KeyEvent.ACTION_UP &&
-                (keyCode == KeyEvent.KEYCODE_DPAD_CENTER || keyCode == KeyEvent.KEYCODE_ENTER)
-            ) {
-                val focused = dialog.window?.currentFocus
-                if (focused is TextView && focused.isClickable) {
-                    focused.performClick()
-                    return@setOnKeyListener true
+            if (event.action == KeyEvent.ACTION_UP) {
+                when (keyCode) {
+                    KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER -> {
+                        val focused = dialog.window?.currentFocus
+                        if (focused is TextView && focused.isClickable) {
+                            focused.performClick()
+                            return@setOnKeyListener true
+                        }
+                    }
+                    KeyEvent.KEYCODE_BACK -> {
+                        if (cancelable) {
+                            dialog.dismiss()
+                            return@setOnKeyListener true
+                        }
+                    }
                 }
             }
-            // 返回键由 dialog cancelable 处理
+            // 让 Dialog 内部正常处理焦点导航
+            if (isTv && event.action == KeyEvent.ACTION_DOWN &&
+                keyCode in intArrayOf(
+                    KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_DOWN,
+                    KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_DPAD_RIGHT
+                )
+            ) {
+                return@setOnKeyListener false
+            }
             false
         }
 
         dialog.show()
 
         // TV：自动聚焦到第一个可聚焦元素（按钮或 RadioButton），方便遥控器立即操作
+        // 注意：若是输入框 dialog，让保存按钮先聚焦，避免立刻弹 IME 导致异常
+        // 若是单选对话框，优先聚焦当前已选中的 RadioButton（用户按上下键就能从当前位置开始）
         dialog.window?.decorView?.post {
             val root = dialog.window?.decorView ?: return@post
             val focusable = ArrayList<View>()
             root.addFocusables(focusable, View.FOCUS_FORWARD)
-            // 优先聚焦到正向第一个按钮（通常是 positive 或 radio 第一项）
-            focusable.firstOrNull()?.let { it.requestFocus() }
+            // TV 上优先聚焦按钮（避免 EditText 触发 IME 异常）
+            // 若有 checked 的 RadioButton，优先聚焦它（单选对话框场景）
+            val target = if (isTv) {
+                focusable.firstOrNull { (it as? RadioButton)?.isChecked == true }
+                    ?: focusable.firstOrNull { it is TextView && it.isClickable }
+                    ?: focusable.firstOrNull()
+            } else {
+                focusable.firstOrNull()
+            }
+            target?.requestFocus()
         }
         return dialog
     }
