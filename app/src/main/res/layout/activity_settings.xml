@@ -33,22 +33,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/toolbar_height"
             android:background="@android:color/transparent"
-            app:titleTextColor="@color/text_primary">
-
-            <!-- 自定义返回按钮：替代 navigationIcon
-                 手机有返回手势，TV 有返回键，但用户要求显式留一个返回按钮 -->
-            <ImageButton
-                android:id="@+id/btnBack"
-                android:layout_width="@dimen/settings_back_btn_size"
-                android:layout_height="@dimen/settings_back_btn_size"
-                android:layout_gravity="start|center_vertical"
-                android:src="@drawable/ic_back"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:tint="@color/text_primary"
-                android:contentDescription="@string/back"
-                android:clickable="true"
-                android:focusable="true" />
-        </com.google.android.material.appbar.MaterialToolbar>
+            app:titleTextColor="@color/text_primary" />
 
         <ScrollView
             android:layout_width="match_parent"

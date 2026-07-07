@@ -81,10 +81,6 @@ class BrowserActivity : AppCompatActivity() {
             v.setPadding(v.paddingLeft, bars.top, v.paddingRight, v.paddingBottom)
             insets
         }
-        // 自定义返回按钮（替代 toolbar 默认 navigationIcon）
-        val btnToolbarBack = findViewById<android.widget.ImageButton>(R.id.btnToolbarBack)
-        btnToolbarBack.setOnClickListener { finish() }
-        FocusHelper.setupFocus(btnToolbarBack)
 
         // 配置 WebView
         configureWebView()
@@ -352,5 +348,7 @@ class BrowserActivity : AppCompatActivity() {
         private const val HOME_PAGE_URL_PREFIX = "file:///android_asset/browser_home"
         /** Intent extra：传入此 URL 时，BrowserActivity 直接加载它而非起始页。 */
         const val EXTRA_URL = "extra_url"
+        /** "关于"页：本地 HTML，瞬间加载，避免 GitHub 直接打开白屏 */
+        const val ABOUT_PAGE_URL = "file:///android_asset/about.html"
     }
 }

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关于 Ke-TV</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100vh;
+            font-family: -apple-system, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+            color: #1A1A2E;
+        }
+
+        body {
+            /* 与 App 整体玻璃质感一致的粉色渐变背景 */
+            background: linear-gradient(135deg, #FFE0F0 0%, #E8E0FF 50%, #E0F0FF 100%);
+            padding: 48px 32px;
+        }
+
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 12px 48px rgba(80, 40, 120, 0.12);
+            padding: 36px 32px;
+            margin-bottom: 24px;
+        }
+
+        .app-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .app-icon {
+            font-size: 64px;
+            margin-bottom: 12px;
+        }
+
+        .app-name {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366F1 0%, #EC4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .app-version {
+            font-size: 14px;
+            color: #6B7280;
+        }
+
+        .section-title {
+            font-size: 14px;
+            color: #6B7280;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .section-content {
+            font-size: 16px;
+            color: #374151;
+            line-height: 1.7;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+            color: #374151;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .feature-list li::before {
+            content: '◆';
+            position: absolute;
+            left: 0;
+            color: #EC4899;
+            font-size: 12px;
+            top: 10px;
+        }
+
+        .link-button {
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #6366F1 0%, #EC4899 100%);
+            color: white !important;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 16px;
+            transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35);
+        }
+
+        .link-button:active {
+            transform: scale(0.97);
+        }
+
+        .link-button.secondary {
+            background: rgba(255, 255, 255, 0.6);
+            color: #6366F1 !important;
+            border: 1.5px solid #6366F1;
+            box-shadow: none;
+            margin-top: 12px;
+        }
+
+        .footer {
+            text-align: center;
+            color: #6B7280;
+            font-size: 13px;
+            margin-top: 32px;
+            line-height: 1.6;
+        }
+
+        .tech-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .tech-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366F1;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card app-header">
+            <div class="app-icon">📺</div>
+            <div class="app-name">Ke-TV</div>
+            <div class="app-version">v1.7.2 · TV 工具箱</div>
+        </div>
+
+        <div class="card">
+            <div class="section-title">项目介绍</div>
+            <div class="section-content">
+                Ke-TV 是一款专为 Android TV 设计的工具箱 APP，提供自定义图床屏保、内置浏览器、软件更新等功能。基于原生 Android 开发，支持 D-pad 遥控器操作，同时兼容手机触摸操作。
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="section-title">核心功能</div>
+            <ul class="feature-list">
+                <li>自定义图床屏保：支持单图 / JSON 列表 / ycy 等多种图床</li>
+                <li>内置浏览器：基于系统 WebView（Chrome 内核）</li>
+                <li>软件更新：GitHub 多代理加速下载</li>
+                <li>TV 优化：D-pad 焦点导航、玻璃质感 UI、自适应尺寸</li>
+                <li>手机兼容：触摸操作、响应式布局</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="section-title">技术栈</div>
+            <div class="tech-info">
+                <span class="tech-tag">Kotlin</span>
+                <span class="tech-tag">Material 3</span>
+                <span class="tech-tag">WebView</span>
+                <span class="tech-tag">Coroutines</span>
+                <span class="tech-tag">OkHttp</span>
+                <span class="tech-tag">Coil</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="section-title">项目主页</div>
+            <div class="section-content" style="margin-bottom: 12px;">
+                查看源码、提交 Issue、获取最新版本：
+            </div>
+            <a href="https://github.com/KeKe0904/Ke-TV" class="link-button">
+                🐱 在 GitHub 查看项目
+            </a>
+            <a href="https://github.com/KeKe0904/Ke-TV/releases" class="link-button secondary">
+                📦 查看最新版本
+            </a>
+        </div>
+
+        <div class="footer">
+            Made with ♥ by KeKe0904<br>
+            © 2024-2026 Ke-TV · 开源项目
+        </div>
+    </div>
+</body>
+</html>

@@ -58,11 +58,6 @@ class SettingsActivity : AppCompatActivity() {
             v.setPadding(v.paddingLeft, bars.top, v.paddingRight, v.paddingBottom)
             insets
         }
-        // 自定义返回按钮（替代 toolbar 默认 navigationIcon）
-        findViewById<android.widget.ImageButton>(R.id.btnBack).also {
-            it.setOnClickListener { finish() }
-            FocusHelper.setupFocus(it)
-        }
 
         bindRows()
     }

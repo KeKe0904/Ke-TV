@@ -25,27 +25,14 @@
         android:clipChildren="false"
         android:clipToPadding="false">
 
-        <!-- 顶部 Toolbar：自定义返回按钮 + 标题 -->
+        <!-- 顶部 Toolbar：标题（无返回按钮，依靠系统返回） -->
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="@dimen/toolbar_height"
             android:background="@android:color/transparent"
             android:title="@string/browser_title"
-            app:titleTextColor="@color/text_primary">
-
-            <ImageButton
-                android:id="@+id/btnToolbarBack"
-                android:layout_width="@dimen/settings_back_btn_size"
-                android:layout_height="@dimen/settings_back_btn_size"
-                android:layout_gravity="start|center_vertical"
-                android:src="@drawable/ic_back"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:tint="@color/text_primary"
-                android:contentDescription="@string/back"
-                android:clickable="true"
-                android:focusable="true" />
-        </com.google.android.material.appbar.MaterialToolbar>
+            app:titleTextColor="@color/text_primary" />
 
         <!-- 地址栏容器 -->
         <LinearLayout

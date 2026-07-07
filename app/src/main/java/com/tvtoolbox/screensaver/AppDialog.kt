@@ -142,7 +142,22 @@ object AppDialog {
         initialText: CharSequence = "",
         onSave: (String) -> Unit
     ): Dialog {
-        val (view, editText) = createInputView(context, hint, initialText)
+        // 关键修复：createInputView 失败（如布局解析异常）也走兜底 dialog
+        // 避免 inflate 失败时异常冒泡到 Activity → finish → "返回首页"
+        val (view, editText) = try {
+            createInputView(context, hint, initialText)
+        } catch (t: Throwable) {
+            return createAndShow(
+                context = context,
+                title = title,
+                contentView = createErrorView(context, t),
+                positiveText = context.getString(R.string.dialog_ok),
+                onPositive = null,
+                negativeText = null,
+                onNegative = null,
+                cancelable = true
+            )
+        }
         val dialog = createAndShow(
             context = context,
             title = title,
@@ -203,6 +218,51 @@ object AppDialog {
     // ===== 内部实现 =====
 
     private fun createAndShow(
+        context: Context,
+        title: CharSequence?,
+        contentView: View,
+        positiveText: CharSequence?,
+        onPositive: (() -> Unit)?,
+        negativeText: CharSequence?,
+        onNegative: (() -> Unit)?,
+        cancelable: Boolean
+    ): Dialog {
+        // 关键修复：整个 dialog 构建流程加 try-catch 兜底
+        // 之前任何环节抛异常（NPE / ClassCastException / 资源解析失败），
+        // 异常会冒泡到调用方 Activity，导致 Activity finish → "点了就回首页"
+        // 现在：构建失败时返回一个最简单的错误 dialog，至少不闪退
+        return try {
+            createAndShowInternal(
+                context, title, contentView,
+                positiveText, onPositive,
+                negativeText, onNegative,
+                cancelable
+            )
+        } catch (t: Throwable) {
+            // 兜底：用最简 AlertDialog 风格的 Dialog 显示错误，避免黑屏 / 闪退
+            try {
+                Dialog(context).apply {
+                    requestWindowFeature(Window.FEATURE_NO_TITLE)
+                    setContentView(createErrorView(context, t))
+                    setCancelable(true)
+                    show()
+                }
+            } catch (_: Throwable) {
+                Dialog(context).apply { show() }
+            }
+        }
+    }
+
+    private fun createErrorView(context: Context, t: Throwable): View {
+        val tv = TextView(context).apply {
+            text = "对话框打开失败：${t.javaClass.simpleName}\n${t.message ?: ""}"
+            setPadding(48, 32, 48, 32)
+            setTextColor(Color.RED)
+        }
+        return tv
+    }
+
+    private fun createAndShowInternal(
         context: Context,
         title: CharSequence?,
         contentView: View,
@@ -449,13 +509,13 @@ object AppDialog {
         val view = inflater.inflate(R.layout.dialog_url_input, null, false)
         val et = view.findViewById<TextInputEditText>(R.id.etUrl)
         // 关键修复（图床 URL 设置崩溃的真正根因）：
-        // 之前写 `view.findViewById<TextInputLayout>(R.id.etUrl).parent as TextInputLayout`
-        // 但 R.id.etUrl 是 TextInputEditText 的 id，用这个 id 找 TextInputLayout 类型会返回 null
+        // 之前用 `view.findViewById<TextInputLayout>(R.id.etUrl).parent as TextInputLayout`
+        // 这是错的：R.id.etUrl 是 EditText 的 id，按类型找 TextInputLayout 返回 null
         // → null.parent 抛 NPE → dialog 崩溃 → 返回键被传给 Activity → finish() → "返回首页"
-        // 正确写法：先 findViewById 拿到 EditText，它的 parent 才是 TextInputLayout
-        val layout = et.parent as TextInputLayout
-        layout.hint = hint
-        et.setText(initialText)
+        // 进一步加固：不依赖 parent 强转（不同 Material 版本可能 wrap EditText），
+        // 直接通过 tilUrl id 找到 TextInputLayout；找不到也不崩溃，只跳过 hint 设置。
+        view.findViewById<TextInputLayout>(R.id.tilUrl)?.hint = hint
+        et?.setText(initialText)
         return view to et
     }
 
