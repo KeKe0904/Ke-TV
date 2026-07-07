@@ -173,7 +173,9 @@ object UpdateManager {
 
         val downloadJob = scope.launch {
             val outcome = withContext(Dispatchers.IO) {
-                downloadApk(result.downloadUrl, targetFile) { read, total ->
+                // 默认走 GitHub 代理：部分网络环境下 github.com 下载链接无法直连
+                val proxyUrl = GithubProxy.wrap(result.downloadUrl)
+                downloadApk(proxyUrl, targetFile) { read, total ->
                     if (total > 0) {
                         val percent = (read * 100 / total).toInt()
                         val readStr = formatSize(read)

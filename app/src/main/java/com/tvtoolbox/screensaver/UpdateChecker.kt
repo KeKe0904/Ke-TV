@@ -40,6 +40,9 @@ object UpdateChecker {
 
     /**
      * 检查更新。失败抛异常，调用方自行处理。
+     *
+     * 注意：API 请求默认走 GitHub 代理（[GithubProxy.wrap]），
+     * 因为部分网络环境下 api.github.com 也无法访问。
      */
     fun check(context: Context): Result {
         val currentVersionName = getVersionName(context)
@@ -47,8 +50,10 @@ object UpdateChecker {
         // 之前 bug：parseVersionCode("v1.6.1")=10601 与 versionCode=11 比较，永远大于，永远提示有更新
         val currentVersionParsed = parseVersionCode(currentVersionName)
 
+        // 默认走 GitHub 代理：部分网络环境无法直连 api.github.com
+        val apiUrl = GithubProxy.wrap(RELEASES_API)
         val request = Request.Builder()
-            .url(RELEASES_API)
+            .url(apiUrl)
             .header("Accept", "application/vnd.github+json")
             .header("User-Agent", "Ke-TV-UpdateChecker/$currentVersionName")
             .build()
