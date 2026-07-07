@@ -9,7 +9,11 @@
        每个板块 = 圆形彩色图标 + 标题 + 简短描述
        手机 2 列，大屏 3 列（@integer/grid_columns 控制）
 
-    注意：clipChildren=false 让 TV 焦点放大动画时卡片不会被父容器截断。
+    全屏显示 + 放大不被截断的关键：
+    1. 根布局 **不设** fitsSystemWindows，让背景层（LiquidBackgroundView）延伸到屏幕边缘
+       （MainActivity 已 setDecorFitsSystemWindows(false)，inset 由 toolbar 单独处理）
+    2. 所有祖先容器都设 clipChildren=false + clipToPadding=false，
+       让卡片放大动画时超出自身 bounds 的部分不会被裁剪
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -17,19 +21,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:clipChildren="false"
-    android:fitsSystemWindows="true">
+    android:clipToPadding="false">
 
-    <!-- 液态背景层 -->
+    <!-- 液态背景层：占满全屏（不受系统栏 inset 影响） -->
     <com.tvtoolbox.screensaver.LiquidBackgroundView
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- 内容层：clipChildren=false 让子卡片放大不被截断 -->
+    <!-- 内容层：clipChildren=false + clipToPadding=false 让子卡片放大不被截断 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:clipChildren="false">
+        android:clipChildren="false"
+        android:clipToPadding="false">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
@@ -45,7 +50,8 @@
             android:fillViewport="true"
             android:scrollbars="none"
             android:overScrollMode="never"
-            android:clipChildren="false">
+            android:clipChildren="false"
+            android:clipToPadding="false">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -53,7 +59,8 @@
                 android:orientation="vertical"
                 android:paddingHorizontal="@dimen/content_padding_h"
                 android:paddingBottom="32dp"
-                android:clipChildren="false">
+                android:clipChildren="false"
+                android:clipToPadding="false">
 
                 <!-- ===== 顶部时间区 ===== -->
                 <LinearLayout
@@ -187,7 +194,14 @@
                     android:letterSpacing="0.1"
                     android:textAllCaps="true" />
 
-                <!-- ===== 功能板块网格 ===== -->
+                <!-- ===== 功能板块网格 =====
+                     用 padding 替代 margin 给卡片留放大空间：
+                     - GridLayout 自身 padding = func_card_margin
+                       （让边缘卡片放大后不被屏幕边缘截断）
+                     - 卡片自身不再设 layout_margin，避免双重间距
+                     - clipChildren=false + clipToPadding=false
+                       让卡片放大时超出 padding 区域的部分也能画出来
+                -->
                 <androidx.gridlayout.widget.GridLayout
                     android:id="@+id/gridFunctions"
                     android:layout_width="match_parent"
@@ -195,7 +209,9 @@
                     app:columnCount="@integer/grid_columns"
                     app:orientation="horizontal"
                     app:useDefaultMargins="false"
-                    android:clipChildren="false">
+                    android:padding="@dimen/func_card_margin"
+                    android:clipChildren="false"
+                    android:clipToPadding="false">
 
                     <!-- 1. 屏保设置 -->
                     <LinearLayout
@@ -205,9 +221,8 @@
                         android:orientation="vertical"
                         android:background="@drawable/glass_card_ripple"
                         android:clickable="true"
-                    android:focusable="true"
-                    android:padding="@dimen/func_card_padding"
-                        android:layout_margin="@dimen/func_card_margin"
+                        android:focusable="true"
+                        android:padding="@dimen/func_card_padding"
                         android:gravity="center_horizontal"
                         app:layout_columnWeight="1"
                         app:layout_gravity="fill">
@@ -248,9 +263,8 @@
                         android:orientation="vertical"
                         android:background="@drawable/glass_card_ripple"
                         android:clickable="true"
-                    android:focusable="true"
-                    android:padding="@dimen/func_card_padding"
-                        android:layout_margin="@dimen/func_card_margin"
+                        android:focusable="true"
+                        android:padding="@dimen/func_card_padding"
                         android:gravity="center_horizontal"
                         app:layout_columnWeight="1"
                         app:layout_gravity="fill">
@@ -291,9 +305,8 @@
                         android:orientation="vertical"
                         android:background="@drawable/glass_card_ripple"
                         android:clickable="true"
-                    android:focusable="true"
-                    android:padding="@dimen/func_card_padding"
-                        android:layout_margin="@dimen/func_card_margin"
+                        android:focusable="true"
+                        android:padding="@dimen/func_card_padding"
                         android:gravity="center_horizontal"
                         app:layout_columnWeight="1"
                         app:layout_gravity="fill">
@@ -334,9 +347,8 @@
                         android:orientation="vertical"
                         android:background="@drawable/glass_card_ripple"
                         android:clickable="true"
-                    android:focusable="true"
-                    android:padding="@dimen/func_card_padding"
-                        android:layout_margin="@dimen/func_card_margin"
+                        android:focusable="true"
+                        android:padding="@dimen/func_card_padding"
                         android:gravity="center_horizontal"
                         app:layout_columnWeight="1"
                         app:layout_gravity="fill">
@@ -377,9 +389,8 @@
                         android:orientation="vertical"
                         android:background="@drawable/glass_card_ripple"
                         android:clickable="true"
-                    android:focusable="true"
-                    android:padding="@dimen/func_card_padding"
-                        android:layout_margin="@dimen/func_card_margin"
+                        android:focusable="true"
+                        android:padding="@dimen/func_card_padding"
                         android:gravity="center_horizontal"
                         app:layout_columnWeight="1"
                         app:layout_gravity="fill">
@@ -420,9 +431,8 @@
                         android:orientation="vertical"
                         android:background="@drawable/glass_card_ripple"
                         android:clickable="true"
-                    android:focusable="true"
-                    android:padding="@dimen/func_card_padding"
-                        android:layout_margin="@dimen/func_card_margin"
+                        android:focusable="true"
+                        android:padding="@dimen/func_card_padding"
                         android:gravity="center_horizontal"
                         app:layout_columnWeight="1"
                         app:layout_gravity="fill">
