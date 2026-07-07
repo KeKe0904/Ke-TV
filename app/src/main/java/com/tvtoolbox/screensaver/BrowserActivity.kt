@@ -74,8 +74,10 @@ class BrowserActivity : AppCompatActivity() {
             v.setPadding(v.paddingLeft, bars.top, v.paddingRight, v.paddingBottom)
             insets
         }
-        // 返回按钮
-        toolbar.setNavigationOnClickListener { finish() }
+        // 自定义返回按钮（替代 toolbar 默认 navigationIcon）
+        val btnToolbarBack = findViewById<android.widget.ImageButton>(R.id.btnToolbarBack)
+        btnToolbarBack.setOnClickListener { finish() }
+        FocusHelper.setupFocus(btnToolbarBack)
 
         // 配置 WebView
         configureWebView()

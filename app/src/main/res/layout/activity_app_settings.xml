@@ -19,9 +19,20 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@android:color/transparent"
-            app:titleTextColor="@color/text_primary"
-            app:navigationIconTint="@color/text_primary"
-            app:navigationIcon="@drawable/ic_back" />
+            app:titleTextColor="@color/text_primary">
+
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_gravity="start|center_vertical"
+                android:src="@drawable/ic_back"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:tint="@color/text_primary"
+                android:contentDescription="@string/back"
+                android:clickable="true"
+                android:focusable="true" />
+        </com.google.android.material.appbar.MaterialToolbar>
 
         <ScrollView
             android:layout_width="match_parent"

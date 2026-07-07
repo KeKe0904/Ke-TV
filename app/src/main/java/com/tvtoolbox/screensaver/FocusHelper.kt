@@ -27,11 +27,12 @@ object FocusHelper {
 
         if (isTv) {
             // TV：焦点放大 + 发光描边
+            // 放大 1.03x（配合父容器 clipChildren=false），既明显又不会被截断
             view.setOnFocusChangeListener { v, hasFocus ->
                 if (hasFocus) {
                     v.background = ContextCompat.getDrawable(v.context, R.drawable.glass_card_focus_bg)
                     v.animate()
-                        .scaleX(1.05f).scaleY(1.05f)
+                        .scaleX(1.03f).scaleY(1.03f)
                         .setDuration(220)
                         .setInterpolator(OvershootInterpolator(1.2f))
                         .start()

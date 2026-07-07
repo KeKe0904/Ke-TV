@@ -25,9 +25,10 @@
     <dimen name="func_title_size">20sp</dimen>
     <dimen name="func_desc_size">15sp</dimen>
 
-    <!-- 容器水平内边距：大屏更宽，左右留白更多 -->
-    <dimen name="content_padding_h">64dp</dimen>
-    <dimen name="content_max_width">900dp</dimen>
+    <!-- 容器水平内边距：大屏左右留白适中（避免电视两边大段空白） -->
+    <dimen name="content_padding_h">32dp</dimen>
+    <!-- 大屏最大内容宽度（避免电视上一行被拉过宽） -->
+    <dimen name="content_max_width">1100dp</dimen>
 
     <!-- 设置页 -->
     <dimen name="settings_row_padding">28dp</dimen>

@@ -32,11 +32,15 @@ class AppSettingsActivity : AppCompatActivity() {
 
         setSupportActionBar(findViewById(R.id.toolbar_settings))
         supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
+            setDisplayHomeAsUpEnabled(false)
+            setDisplayShowHomeEnabled(false)
             title = getString(R.string.app_settings_title)
         }
-        findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar_settings)
-            .setNavigationOnClickListener { finish() }
+        // 自定义返回按钮（替代 toolbar 默认 navigationIcon）
+        findViewById<android.widget.ImageButton>(R.id.btnBack).also {
+            it.setOnClickListener { finish() }
+            FocusHelper.setupFocus(it)
+        }
 
         bindRows()
     }
@@ -47,11 +51,6 @@ class AppSettingsActivity : AppCompatActivity() {
         // 如果 versionCode 没变，说明用户取消或签名不一致
         UpdateManager.verifyInstallResult(this)
         refreshUi()
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        finish()
-        return true
     }
 
     private fun bindRows() {

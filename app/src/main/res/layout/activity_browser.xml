@@ -22,15 +22,27 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- 顶部 Toolbar：返回 + 标题 -->
+        <!-- 顶部 Toolbar：自定义返回按钮 + 标题 -->
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="@dimen/toolbar_height"
             android:background="@android:color/transparent"
             android:title="@string/browser_title"
-            app:navigationIcon="@drawable/ic_back"
-            app:titleTextColor="@color/text_primary" />
+            app:titleTextColor="@color/text_primary">
+
+            <ImageButton
+                android:id="@+id/btnToolbarBack"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_gravity="start|center_vertical"
+                android:src="@drawable/ic_back"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:tint="@color/text_primary"
+                android:contentDescription="@string/back"
+                android:clickable="true"
+                android:focusable="true" />
+        </com.google.android.material.appbar.MaterialToolbar>
 
         <!-- 地址栏容器 -->
         <LinearLayout

@@ -7,6 +7,13 @@
     <color name="glass_stroke">#22000000</color>
     <color name="glass_stroke_strong">#3D000000</color>
 
+    <!-- 弹窗专用：高不透明度，确保 TV 3 米外可读 -->
+    <color name="dialog_fill">#F2FFFFFF</color>
+    <color name="dialog_fill_night">#F2000000</color>
+    <color name="dialog_stroke">#66000000</color>
+    <color name="dialog_stroke_night">#66FFFFFF</color>
+    <color name="dialog_dim">#99000000</color>
+
     <!-- 文字：白天为深色 -->
     <color name="text_primary">#FF0F0F0F</color>
     <color name="text_secondary">#B3000000</color>

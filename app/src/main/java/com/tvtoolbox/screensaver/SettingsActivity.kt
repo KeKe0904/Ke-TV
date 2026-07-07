@@ -40,11 +40,15 @@ class SettingsActivity : AppCompatActivity() {
 
         setSupportActionBar(findViewById(R.id.toolbar_settings))
         supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
+            setDisplayHomeAsUpEnabled(false)
+            setDisplayShowHomeEnabled(false)
             title = getString(R.string.settings_title)
         }
-        findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar_settings)
-            .setNavigationOnClickListener { finish() }
+        // 自定义返回按钮（替代 toolbar 默认 navigationIcon）
+        findViewById<android.widget.ImageButton>(R.id.btnBack).also {
+            it.setOnClickListener { finish() }
+            FocusHelper.setupFocus(it)
+        }
 
         bindRows()
     }
@@ -52,11 +56,6 @@ class SettingsActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         refreshUi()
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        finish()
-        return true
     }
 
     private fun bindRows() {
@@ -201,15 +200,32 @@ class SettingsActivity : AppCompatActivity() {
                     getString(R.string.test_fail, t.message ?: "?")
                 }
             }
-            Toast.makeText(this@SettingsActivity, msg, Toast.LENGTH_LONG).show()
-            tv.text = original
+            try {
+                Toast.makeText(this@SettingsActivity, msg, Toast.LENGTH_LONG).show()
+                tv.text = original
+            } catch (_: Throwable) {
+                // Activity 已经销毁，忽略
+            }
         }
     }
 
     private fun openDreamSettings() {
-        val ok = DreamSettingsHelper.openDreamSettings(this)
+        val ok = try {
+            DreamSettingsHelper.openDreamSettings(this)
+        } catch (_: Throwable) {
+            false
+        }
         if (!ok) {
-            Toast.makeText(this, R.string.dream_settings_unavailable, Toast.LENGTH_LONG).show()
+            // 用应用内置弹窗替代 Toast，让 TV 上看得更清楚
+            showAppMessage(
+                title = getString(R.string.card_dream_settings_title),
+                message = getString(R.string.dream_settings_fallback),
+                positiveText = getString(R.string.card_start_screensaver_title),
+                onPositive = {
+                    try { DreamSettingsHelper.triggerScreensaverNow(this) } catch (_: Throwable) {}
+                },
+                negativeText = getString(R.string.dialog_cancel)
+            )
         }
     }
 

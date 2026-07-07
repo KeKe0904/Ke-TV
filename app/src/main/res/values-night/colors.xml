@@ -7,6 +7,11 @@
     <color name="glass_stroke">#22FFFFFF</color>
     <color name="glass_stroke_strong">#3DFFFFFF</color>
 
+    <!-- 弹窗专用：高不透明度（夜间覆盖为黑底） -->
+    <color name="dialog_fill">#F2000000</color>
+    <color name="dialog_stroke">#66FFFFFF</color>
+    <color name="dialog_dim">#CC000000</color>
+
     <!-- 文字：夜间为浅色 -->
     <color name="text_primary">#FFFFFFFF</color>
     <color name="text_secondary">#B3FFFFFF</color>

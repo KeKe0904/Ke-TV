@@ -111,13 +111,16 @@
     <string name="dream_settings_fallback">系统屏保设置不可用\n你可以用「立即进入屏保」测试</string>
     <string name="feature_coming_soon">「%1$s」功能开发中，敬请期待</string>
 
-    <string name="about_summary">Ke-TV v1.6.5 · 测试版本</string>
+    <string name="about_summary">Ke-TV v1.6.6 · 测试版本</string>
     <string name="about_github_url">https://github.com/KeKe0904/Ke-TV</string>
 
     <!-- 对话框 -->
     <string name="dialog_ok">确定</string>
     <string name="dialog_cancel">取消</string>
     <string name="dialog_save">保存</string>
+
+    <!-- 通用返回按钮 -->
+    <string name="back">返回</string>
     <string name="dialog_url_title">图床 URL</string>
     <string name="dialog_url_message">粘贴图床 URL（单图或 JSON 列表）</string>
     <string name="dialog_interval_title">切换间隔</string>

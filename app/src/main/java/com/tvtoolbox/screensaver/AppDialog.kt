@@ -3,8 +3,12 @@ package com.tvtoolbox.screensaver
 import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
+import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
+import android.os.Build
 import android.os.Bundle
+import android.view.Gravity
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +20,8 @@ import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 
@@ -187,15 +193,47 @@ object AppDialog {
         dialog.setCanceledOnTouchOutside(cancelable)
 
         // 透明化窗口背景，让 dialog_glass_bg 自己显示
+        // 同时加 dim 层（半透明黑），让弹窗在 TV / 任何背景下都更突出
         dialog.window?.apply {
             setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            // 让弹窗宽度接近屏幕宽（手机端不被挤压）
+            // dimAmount 在 TV 上尤其重要：背景变暗让弹窗前景更清晰
+            addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+            setDimAmount(0.55f)
+            // 让弹窗宽度接近屏幕宽（手机端不被挤压，TV 上有 paddingHorizontal 24dp）
             setLayout(
                 WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.WRAP_CONTENT
             )
+            // TV：弹窗居中而非顶部，更符合遥控器视觉中心
+            setGravity(Gravity.CENTER)
         }
+
+        // TV：监听 D-pad 中央键（KEYCODE_DPAD_CENTER）和回车键，触发现焦点的按钮点击
+        // 部分电视上 Dialog 默认不消费这些键，导致无效。
+        dialog.setOnKeyListener { _, keyCode, event ->
+            if (event.action == KeyEvent.ACTION_UP &&
+                (keyCode == KeyEvent.KEYCODE_DPAD_CENTER || keyCode == KeyEvent.KEYCODE_ENTER)
+            ) {
+                val focused = dialog.window?.currentFocus
+                if (focused is TextView && focused.isClickable) {
+                    focused.performClick()
+                    return@setOnKeyListener true
+                }
+            }
+            // 返回键由 dialog cancelable 处理
+            false
+        }
+
         dialog.show()
+
+        // TV：自动聚焦到第一个可聚焦元素（按钮或 RadioButton），方便遥控器立即操作
+        dialog.window?.decorView?.post {
+            val root = dialog.window?.decorView ?: return@post
+            val focusable = ArrayList<View>()
+            root.addFocusables(focusable, View.FOCUS_FORWARD)
+            // 优先聚焦到正向第一个按钮（通常是 positive 或 radio 第一项）
+            focusable.firstOrNull()?.let { it.requestFocus() }
+        }
         return dialog
     }
 
@@ -260,7 +298,7 @@ object AppDialog {
             this.text = text
             textSize = 14f
             setTextColor(if (isPrimary) Color.WHITE else context.colorCompat(R.color.text_primary))
-            typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
+            typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
             background = context.getDrawableCompat(
                 if (isPrimary) R.drawable.dialog_btn_primary else R.drawable.dialog_btn_secondary
             )
@@ -275,7 +313,19 @@ object AppDialog {
             lp.marginStart = (8 * context.resources.displayMetrics.density).toInt()
             layoutParams = lp
             isFocusable = true
-            isFocusableInTouchMode = false
+            isFocusableInTouchMode = true
+            isClickable = true
+
+            // TV 焦点态：聚焦时抬升 + 轻微放大，让用户看到当前焦点
+            setOnFocusChangeListener { v, hasFocus ->
+                if (hasFocus) {
+                    v.elevation = 8f
+                    v.animate().scaleX(1.05f).scaleY(1.05f).setDuration(150).start()
+                } else {
+                    v.elevation = 0f
+                    v.animate().scaleX(1.0f).scaleY(1.0f).setDuration(150).start()
+                }
+            }
         }
     }
 
@@ -312,6 +362,9 @@ object AppDialog {
                 buttonDrawable = null // 隐藏原生圆点，用背景表示选中
                 id = index + 1
                 isChecked = index == checkedIndex
+                // TV D-pad 适配：让 RadioButton 可以被聚焦，遥控器可上下移动
+                isFocusable = true
+                isFocusableInTouchMode = true
                 val lp = RadioGroup.LayoutParams(
                     RadioGroup.LayoutParams.MATCH_PARENT,
                     RadioGroup.LayoutParams.WRAP_CONTENT

@@ -11,8 +11,8 @@ android {
         applicationId = "com.tvtoolbox.screensaver"
         minSdk = 21
         targetSdk = 34
-        versionCode = 15
-        versionName = "1.6.5"
+        versionCode = 16
+        versionName = "1.6.6"
     }
 
     // 用 debug keystore 给 release 签名，方便用户直接安装测试

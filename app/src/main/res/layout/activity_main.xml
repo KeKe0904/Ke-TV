@@ -8,12 +8,15 @@
     3. 功能网格：6 个板块（屏保设置 / 立即进入 / 系统屏保 / 浏览器 / 检查更新 / 关于）
        每个板块 = 圆形彩色图标 + 标题 + 简短描述
        手机 2 列，大屏 3 列（@integer/grid_columns 控制）
+
+    注意：clipChildren=false 让 TV 焦点放大动画时卡片不会被父容器截断。
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clipChildren="false"
     android:fitsSystemWindows="true">
 
     <!-- 液态背景层 -->
@@ -21,11 +24,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- 内容层 -->
+    <!-- 内容层：clipChildren=false 让子卡片放大不被截断 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:clipChildren="false">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
@@ -40,14 +44,16 @@
             android:layout_height="match_parent"
             android:fillViewport="true"
             android:scrollbars="none"
-            android:overScrollMode="never">
+            android:overScrollMode="never"
+            android:clipChildren="false">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingHorizontal="@dimen/content_padding_h"
-                android:paddingBottom="32dp">
+                android:paddingBottom="32dp"
+                android:clipChildren="false">
 
                 <!-- ===== 顶部时间区 ===== -->
                 <LinearLayout
@@ -188,7 +194,8 @@
                     android:layout_height="wrap_content"
                     app:columnCount="@integer/grid_columns"
                     app:orientation="horizontal"
-                    app:useDefaultMargins="false">
+                    app:useDefaultMargins="false"
+                    android:clipChildren="false">
 
                     <!-- 1. 屏保设置 -->
                     <LinearLayout
