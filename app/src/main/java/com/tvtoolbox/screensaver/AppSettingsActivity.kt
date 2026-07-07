@@ -6,6 +6,9 @@ import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -29,6 +32,8 @@ class AppSettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeHelper.apply(this)
         super.onCreate(savedInstanceState)
+        // 全屏：让背景层延伸到屏幕边缘
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_app_settings)
 
         setSupportActionBar(findViewById(R.id.toolbar_settings))
@@ -36,6 +41,13 @@ class AppSettingsActivity : AppCompatActivity() {
             setDisplayHomeAsUpEnabled(false)
             setDisplayShowHomeEnabled(false)
             title = getString(R.string.app_settings_title)
+        }
+        // toolbar 单独处理状态栏 inset
+        val toolbar = findViewById<View>(R.id.toolbar_settings)
+        ViewCompat.setOnApplyWindowInsetsListener(toolbar) { v, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(v.paddingLeft, bars.top, v.paddingRight, v.paddingBottom)
+            insets
         }
         // 自定义返回按钮（替代 toolbar 默认 navigationIcon）
         findViewById<android.widget.ImageButton>(R.id.btnBack).also {

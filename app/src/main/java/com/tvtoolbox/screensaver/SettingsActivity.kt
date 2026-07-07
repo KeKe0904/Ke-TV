@@ -5,6 +5,9 @@ import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.materialswitch.MaterialSwitch
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -37,6 +40,9 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeHelper.apply(this)
         super.onCreate(savedInstanceState)
+        // 全屏：让背景层延伸到屏幕边缘，不被 system bar inset 推进
+        // （移除了布局里的 fitsSystemWindows=true，配合 setDecorFitsSystemWindows(false)）
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_settings)
 
         setSupportActionBar(findViewById(R.id.toolbar_settings))
@@ -44,6 +50,13 @@ class SettingsActivity : AppCompatActivity() {
             setDisplayHomeAsUpEnabled(false)
             setDisplayShowHomeEnabled(false)
             title = getString(R.string.settings_title)
+        }
+        // toolbar 单独处理状态栏 inset（顶部 padding）
+        val toolbar = findViewById<View>(R.id.toolbar_settings)
+        ViewCompat.setOnApplyWindowInsetsListener(toolbar) { v, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(v.paddingLeft, bars.top, v.paddingRight, v.paddingBottom)
+            insets
         }
         // 自定义返回按钮（替代 toolbar 默认 navigationIcon）
         findViewById<android.widget.ImageButton>(R.id.btnBack).also {

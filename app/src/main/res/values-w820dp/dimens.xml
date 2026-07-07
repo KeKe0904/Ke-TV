@@ -39,10 +39,13 @@
 
     <!-- 设置页 -->
     <dimen name="settings_row_padding">28dp</dimen>
+    <!-- 设置页内容容器水平 padding：TV 上加大，给 row 放大留余量 -->
+    <dimen name="settings_content_padding_h">48dp</dimen>
     <dimen name="settings_row_title_size">20sp</dimen>
     <dimen name="settings_row_summary_size">15sp</dimen>
     <dimen name="settings_section_label_size">14sp</dimen>
     <dimen name="settings_about_size">13sp</dimen>
+    <dimen name="settings_back_btn_size">56dp</dimen>
 
     <!-- Toolbar -->
     <dimen name="toolbar_height">72dp</dimen>

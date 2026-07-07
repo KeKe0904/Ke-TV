@@ -30,10 +30,13 @@
 
     <!-- 设置页 -->
     <dimen name="settings_row_padding">22dp</dimen>
+    <!-- 设置页内容容器水平 padding（row 放大时的余量也来自这里） -->
+    <dimen name="settings_content_padding_h">20dp</dimen>
     <dimen name="settings_row_title_size">16sp</dimen>
     <dimen name="settings_row_summary_size">13sp</dimen>
     <dimen name="settings_section_label_size">12sp</dimen>
     <dimen name="settings_about_size">11sp</dimen>
+    <dimen name="settings_back_btn_size">44dp</dimen>
 
     <!-- Toolbar -->
     <dimen name="toolbar_height">56dp</dimen>

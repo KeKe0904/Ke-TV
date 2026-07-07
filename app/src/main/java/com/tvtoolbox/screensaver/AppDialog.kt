@@ -447,11 +447,15 @@ object AppDialog {
     ): Pair<View, TextInputEditText> {
         val inflater = LayoutInflater.from(context)
         val view = inflater.inflate(R.layout.dialog_url_input, null, false)
-        val layout = view.findViewById<TextInputLayout>(R.id.etUrl).parent as TextInputLayout
-        layout.hint = hint
         val et = view.findViewById<TextInputEditText>(R.id.etUrl)
+        // 关键修复（图床 URL 设置崩溃的真正根因）：
+        // 之前写 `view.findViewById<TextInputLayout>(R.id.etUrl).parent as TextInputLayout`
+        // 但 R.id.etUrl 是 TextInputEditText 的 id，用这个 id 找 TextInputLayout 类型会返回 null
+        // → null.parent 抛 NPE → dialog 崩溃 → 返回键被传给 Activity → finish() → "返回首页"
+        // 正确写法：先 findViewById 拿到 EditText，它的 parent 才是 TextInputLayout
+        val layout = et.parent as TextInputLayout
+        layout.hint = hint
         et.setText(initialText)
-        view to et
         return view to et
     }
 

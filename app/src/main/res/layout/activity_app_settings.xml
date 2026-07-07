@@ -1,9 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    软件设置页布局。
+
+    全屏显示 + 放大不被截断的关键（与 activity_main.xml / activity_settings.xml 一致）：
+    1. 根布局 **不设** fitsSystemWindows，让背景层延伸到屏幕边缘
+       （AppSettingsActivity 已 setDecorFitsSystemWindows(false)，inset 由 toolbar 单独处理）
+    2. 所有祖先容器都设 clipChildren=false + clipToPadding=false，
+       让 row 放大动画时超出自身 bounds 的部分不会被裁剪
+    3. 所有 padding / textSize 用 @dimen 引用，TV 端 values-w820dp/dimens.xml 覆盖
+-->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:clipChildren="false"
+    android:clipToPadding="false">
 
     <com.tvtoolbox.screensaver.LiquidBackgroundView
         android:layout_width="match_parent"
@@ -12,19 +23,21 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:clipChildren="false"
+        android:clipToPadding="false">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar_settings"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="@dimen/toolbar_height"
             android:background="@android:color/transparent"
             app:titleTextColor="@color/text_primary">
 
             <ImageButton
                 android:id="@+id/btnBack"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
+                android:layout_width="@dimen/settings_back_btn_size"
+                android:layout_height="@dimen/settings_back_btn_size"
                 android:layout_gravity="start|center_vertical"
                 android:src="@drawable/ic_back"
                 android:background="?attr/selectableItemBackgroundBorderless"
@@ -39,14 +52,18 @@
             android:layout_height="match_parent"
             android:fillViewport="true"
             android:scrollbars="none"
-            android:overScrollMode="never">
+            android:overScrollMode="never"
+            android:clipChildren="false"
+            android:clipToPadding="false">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingHorizontal="20dp"
-                android:paddingBottom="32dp">
+                android:paddingHorizontal="@dimen/settings_content_padding_h"
+                android:paddingBottom="32dp"
+                android:clipChildren="false"
+                android:clipToPadding="false">
 
                 <!-- 分组：软件 -->
                 <TextView
@@ -57,7 +74,7 @@
                     android:layout_marginBottom="10dp"
                     android:text="@string/cat_app_settings"
                     android:textColor="@color/text_tertiary"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/settings_section_label_size"
                     android:fontFamily="sans-serif-medium"
                     android:letterSpacing="0.1"
                     android:textAllCaps="true" />
@@ -71,7 +88,7 @@
                     android:background="@drawable/glass_card_ripple"
                     android:clickable="true"
                     android:focusable="true"
-                    android:padding="22dp"
+                    android:padding="@dimen/settings_row_padding"
                     android:layout_marginBottom="10dp"
                     android:gravity="center_vertical">
 
@@ -86,7 +103,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/pref_theme_mode_title"
                             android:textColor="@color/text_primary"
-                            android:textSize="16sp"
+                            android:textSize="@dimen/settings_row_title_size"
                             android:fontFamily="sans-serif-medium" />
 
                         <TextView
@@ -96,7 +113,7 @@
                             android:layout_marginTop="4dp"
                             android:text="@string/pref_theme_mode_summary"
                             android:textColor="@color/text_tertiary"
-                            android:textSize="13sp"
+                            android:textSize="@dimen/settings_row_summary_size"
                             android:fontFamily="sans-serif-light" />
                     </LinearLayout>
 
@@ -117,7 +134,7 @@
                     android:background="@drawable/glass_card_ripple"
                     android:clickable="true"
                     android:focusable="true"
-                    android:padding="22dp"
+                    android:padding="@dimen/settings_row_padding"
                     android:layout_marginBottom="10dp">
 
                     <TextView
@@ -126,7 +143,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/pref_check_update_title"
                         android:textColor="@color/text_primary"
-                        android:textSize="16sp"
+                        android:textSize="@dimen/settings_row_title_size"
                         android:fontFamily="sans-serif-medium" />
 
                     <TextView
@@ -136,7 +153,7 @@
                         android:layout_marginTop="4dp"
                         android:text="@string/pref_check_update_summary"
                         android:textColor="@color/text_tertiary"
-                        android:textSize="13sp"
+                        android:textSize="@dimen/settings_row_summary_size"
                         android:fontFamily="sans-serif-light" />
                 </LinearLayout>
 
@@ -147,7 +164,7 @@
                     android:gravity="center"
                     android:text="@string/about_summary"
                     android:textColor="@color/text_tertiary"
-                    android:textSize="11sp"
+                    android:textSize="@dimen/settings_about_size"
                     android:fontFamily="sans-serif-light"
                     android:letterSpacing="0.1" />
 

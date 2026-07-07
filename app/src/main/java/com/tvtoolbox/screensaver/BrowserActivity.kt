@@ -50,12 +50,19 @@ class BrowserActivity : AppCompatActivity() {
     /** 当前是否正在加载。true 时刷新按钮显示为停止。 */
     private var isLoading = false
 
+    /** 入口传入的 URL（如有）：onCreate 后立即加载此 URL 而非起始页。 */
+    private var initialExternalUrl: String? = null
+
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeHelper.apply(this)
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_browser)
+
+        // 入口参数：外部传入的 URL（"关于"页面跳转用）
+        // 如有 EXTRA_URL，直接加载该 URL，而不是浏览器起始页
+        initialExternalUrl = intent?.getStringExtra(EXTRA_URL)?.takeIf { it.isNotBlank() }
 
         // 绑定 View
         toolbar = findViewById(R.id.toolbar)
@@ -98,9 +105,16 @@ class BrowserActivity : AppCompatActivity() {
             }
         }
 
-        // 首次加载起始页（本地 HTML，二次元风格搜索起始页）
+        // 首次加载：
+        // - 有 EXTRA_URL → 直接加载该 URL（"关于"页面跳转用）
+        // - 无 → 加载本地起始页
         if (savedInstanceState == null) {
-            loadHomePage()
+            val extUrl = initialExternalUrl
+            if (extUrl != null) {
+                loadUrl(extUrl)
+            } else {
+                loadHomePage()
+            }
         } else {
             savedInstanceState.getBundle(KEY_STATE)?.let { webView.restoreState(it) }
         }
@@ -330,11 +344,13 @@ class BrowserActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    private companion object {
+    companion object {
         private const val KEY_STATE = "webview_state"
         /** 起始页 URL：本地 assets 中的 HTML（二次元风格 + ycy 图床背景）。 */
         private const val HOME_PAGE_URL = "file:///android_asset/browser_home.html"
         /** 用于识别"当前是否在起始页"的前缀。 */
         private const val HOME_PAGE_URL_PREFIX = "file:///android_asset/browser_home"
+        /** Intent extra：传入此 URL 时，BrowserActivity 直接加载它而非起始页。 */
+        const val EXTRA_URL = "extra_url"
     }
 }

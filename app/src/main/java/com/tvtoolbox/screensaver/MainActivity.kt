@@ -94,11 +94,22 @@ class MainActivity : AppCompatActivity() {
         }
 
         // 6. 关于：打开 GitHub 项目主页
+        // 用 APP 内浏览器（BrowserActivity）打开，避免有些电视没有自带浏览器
+        // BrowserActivity 接收 EXTRA_URL，自动加载该 URL
         findViewById<View>(R.id.cardAbout).setOnClickListener {
+            val aboutUrl = getString(R.string.about_github_url)
+            val intent = Intent(this, BrowserActivity::class.java).apply {
+                putExtra(BrowserActivity.EXTRA_URL, aboutUrl)
+            }
             try {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.about_github_url))))
+                startActivity(intent)
             } catch (_: Throwable) {
-                Toast.makeText(this, "无法打开浏览器", Toast.LENGTH_SHORT).show()
+                // APP 内浏览器也启动失败的极端情况：兜底尝试外部浏览器
+                try {
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(aboutUrl)))
+                } catch (_: Throwable) {
+                    Toast.makeText(this, "无法打开浏览器", Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
