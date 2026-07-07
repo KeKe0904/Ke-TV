@@ -276,6 +276,14 @@ object UpdateManager {
                 Uri.fromFile(file)
             }
 
+            // 记录安装前的 versionCode，Activity 恢复时用于检测安装是否真正成功
+            val beforeVersionCode = try {
+                activity.packageManager
+                    .getPackageInfo(activity.packageName, 0).longVersionCode
+            } catch (_: Throwable) { -1L }
+            Prefs.setLastInstallCheckVersionCode(activity, beforeVersionCode)
+            Prefs.setLastInstallApkPath(activity, file.absolutePath)
+
             val intent = Intent(Intent.ACTION_VIEW).apply {
                 setDataAndType(uri, "application/vnd.android.package-archive")
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -288,6 +296,50 @@ object UpdateManager {
         } catch (t: Throwable) {
             Log.e(TAG, "install failed", t)
             onStatusChange(activity, activity.getString(R.string.update_install_failed))
+        }
+    }
+
+    /**
+     * 在 Activity onResume 时调用，检测上一次启动的安装器是否真正完成安装。
+     *
+     * 场景：用户点"下载并安装" → 系统安装器弹出 → 用户取消或签名不一致失败 →
+     * 用户回到 APP，但 APP 之前已显示"下载完成"——给用户造成"装上了"的错觉。
+     *
+     * 这里通过比对 versionCode 来识别这种"假安装成功"，并提示用户。
+     */
+    fun verifyInstallResult(activity: Activity) {
+        val beforeCode = Prefs.lastInstallCheckVersionCode(activity)
+        val apkPath = Prefs.lastInstallApkPath(activity)
+        if (beforeCode < 0 || apkPath.isBlank()) return
+
+        // 清掉标记，只检测一次
+        Prefs.setLastInstallCheckVersionCode(activity, -1L)
+        Prefs.setLastInstallApkPath(activity, "")
+
+        val currentCode = try {
+            activity.packageManager
+                .getPackageInfo(activity.packageName, 0).longVersionCode
+        } catch (_: Throwable) { return }
+
+        if (currentCode == beforeCode) {
+            // 版本号没变 → 安装失败/被取消。最常见原因是签名不一致。
+            val apkFile = File(apkPath)
+            val apkExists = apkFile.exists()
+            val hint = if (apkExists) {
+                // APK 还在，可能是用户在系统安装器界面取消了
+                activity.getString(R.string.update_install_canceled_hint)
+            } else {
+                activity.getString(R.string.update_install_signature_mismatch)
+            }
+            if (!activity.isFinishing && !activity.isDestroyed) {
+                AppDialog.showMessage(
+                    context = activity,
+                    title = activity.getString(R.string.update_install_verify_title),
+                    message = hint,
+                    positiveText = activity.getString(R.string.dialog_ok),
+                    onPositive = null
+                )
+            }
         }
     }
 

@@ -12,7 +12,9 @@ import java.util.concurrent.TimeUnit
  * 使用 wttr.in 免费 API，根据请求来源 IP 自动定位城市，无需 API key。
  * 接口：https://wttr.in/?format=j1 返回 JSON。
  *
- * 备用：https://wttr.in/?format=%l:+%c+%t+%h+%w  返回纯文本一行。
+ * 性能优化（v1.6.3）：
+ * - 内存缓存：10 分钟内重复请求不重复打网络
+ * - 缓存让用户切换 Activity 回主页时立即看到上次的天气，避免每次都重新加载
  */
 class WeatherFetcher {
 
@@ -31,8 +33,27 @@ class WeatherFetcher {
         val code: String
     )
 
-    /** 拉取天气。失败抛异常。 */
+    companion object {
+        /** 内存缓存：10 分钟内的天气数据复用，避免短时间内重复请求。 */
+        @Volatile private var cached: Weather? = null
+        @Volatile private var cachedAt: Long = 0L
+        private const val CACHE_TTL_MS = 10L * 60 * 1000
+
+        /** 仅供测试用：清掉缓存。 */
+        fun clearCache() {
+            cached = null
+            cachedAt = 0L
+        }
+    }
+
+    /** 拉取天气。失败抛异常。优先返回缓存。 */
     fun fetch(): Weather {
+        val now = System.currentTimeMillis()
+        val c = cached
+        if (c != null && now - cachedAt < CACHE_TTL_MS) {
+            return c
+        }
+
         val request = Request.Builder()
             .url("https://wttr.in/?format=j1")
             .header("User-Agent", "Ke-TV/1.5 (Android)")
@@ -44,7 +65,10 @@ class WeatherFetcher {
                 throw RuntimeException("HTTP ${resp.code}")
             }
             val body = resp.body?.string() ?: throw RuntimeException("响应为空")
-            return parse(body)
+            val result = parse(body)
+            cached = result
+            cachedAt = now
+            return result
         }
     }
 
@@ -78,3 +102,4 @@ class WeatherFetcher {
         )
     }
 }
+

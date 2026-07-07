@@ -60,6 +60,11 @@
     <string name="update_no_assets">新版本未提供 APK 安装包，无法下载</string>
     <string name="update_download_canceled">下载已取消</string>
 
+    <!-- 安装结果检测 -->
+    <string name="update_install_verify_title">安装未完成</string>
+    <string name="update_install_canceled_hint">检测到 Ke-TV 仍未更新。\n\n你可能在系统安装器界面取消了安装。点击「软件更新」可重新尝试。</string>
+    <string name="update_install_signature_mismatch">检测到 Ke-TV 仍未更新。\n\n最常见的原因是新 APK 与已安装版本的签名不一致，系统安装器拒绝覆盖安装。请先卸载旧版 Ke-TV，再重新点击「软件更新」下载并安装。\n\n注意：卸载会清除本应用所有配置。</string>
+
     <!-- 软件设置 -->
     <string name="app_settings_title">软件设置</string>
     <string name="card_app_settings_title">软件设置</string>
@@ -106,7 +111,7 @@
     <string name="dream_settings_fallback">系统屏保设置不可用\n你可以用「立即进入屏保」测试</string>
     <string name="feature_coming_soon">「%1$s」功能开发中，敬请期待</string>
 
-    <string name="about_summary">Ke-TV v1.6.2 · 测试版本</string>
+    <string name="about_summary">Ke-TV v1.6.3 · 测试版本</string>
     <string name="about_github_url">https://github.com/KeKe0904/Ke-TV</string>
 
     <!-- 对话框 -->

@@ -46,4 +46,20 @@ object Prefs {
 
     fun setThemeMode(context: Context, value: String) =
         get(context).edit().putString("theme_mode", value).apply()
+
+    // ===== 更新安装结果检测 =====
+    // 用户点"下载并安装"后，启动系统安装器，但 APP 不知道用户最终有没有点"安装"。
+    // 这里记录安装前的 versionCode，Activity onResume 时比对，识别"假安装成功"。
+
+    fun lastInstallCheckVersionCode(context: Context): Long =
+        get(context).getLong("last_install_check_vc", -1L)
+
+    fun setLastInstallCheckVersionCode(context: Context, value: Long) =
+        get(context).edit().putLong("last_install_check_vc", value).apply()
+
+    fun lastInstallApkPath(context: Context): String =
+        get(context).getString("last_install_apk_path", "") ?: ""
+
+    fun setLastInstallApkPath(context: Context, value: String) =
+        get(context).edit().putString("last_install_apk_path", value).apply()
 }

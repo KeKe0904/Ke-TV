@@ -93,8 +93,11 @@ class MainActivity : AppCompatActivity() {
         )
         FocusHelper.requestInitialFocus(cardSettings)
 
-        // 首次加载天气
-        loadWeather()
+        // 首次加载天气：推迟到 ViewCreated 后，避免阻塞 onCreate
+        // 用户看到主界面立即可交互，天气数据后台填充
+        findViewById<View>(R.id.cardWeather).post {
+            loadWeather()
+        }
     }
 
     override fun onDestroy() {

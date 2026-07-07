@@ -43,6 +43,9 @@ class AppSettingsActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        // 检测上一次启动的系统安装器是否真正完成安装
+        // 如果 versionCode 没变，说明用户取消或签名不一致
+        UpdateManager.verifyInstallResult(this)
         refreshUi()
     }
 
