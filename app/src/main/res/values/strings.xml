@@ -98,7 +98,7 @@
     <string name="card_dream_settings_title">系统屏保设置</string>
     <string name="card_dream_settings_desc">选择本 APP 为系统屏保</string>
     <string name="card_browser_title">浏览器</string>
-    <string name="card_browser_desc">敬请期待</string>
+    <string name="card_browser_desc">搜索 · 网页浏览</string>
     <string name="card_about_title">关于</string>
     <string name="card_about_desc">项目主页 · 版本信息</string>
     <string name="card_status_title">图床状态</string>
@@ -111,7 +111,7 @@
     <string name="dream_settings_fallback">系统屏保设置不可用\n你可以用「立即进入屏保」测试</string>
     <string name="feature_coming_soon">「%1$s」功能开发中，敬请期待</string>
 
-    <string name="about_summary">Ke-TV v1.6.3 · 测试版本</string>
+    <string name="about_summary">Ke-TV v1.6.4 · 测试版本</string>
     <string name="about_github_url">https://github.com/KeKe0904/Ke-TV</string>
 
     <!-- 对话框 -->
@@ -121,4 +121,20 @@
     <string name="dialog_url_title">图床 URL</string>
     <string name="dialog_url_message">粘贴图床 URL（单图或 JSON 列表）</string>
     <string name="dialog_interval_title">切换间隔</string>
+
+    <!-- 浏览器 -->
+    <string name="browser_title">浏览器</string>
+    <string name="browser_back">后退</string>
+    <string name="browser_forward">前进</string>
+    <string name="browser_refresh">刷新</string>
+    <string name="browser_stop">停止</string>
+    <string name="browser_home">主页</string>
+    <string name="browser_search_hint">搜索或输入网址</string>
+    <string name="browser_go">前往</string>
+    <string name="browser_homepage">https://www.baidu.com</string>
+    <string name="browser_loading">加载中…</string>
+    <string name="browser_error_title">无法加载页面</string>
+    <string name="browser_error_message">页面加载失败：%1$s</string>
+    <string name="browser_location_denied">未授予定位权限，将以 IP 估算位置查询天气</string>
+    <string name="browser_location_rationale">需要定位权限以获取准确的当地天气。拒绝将使用 IP 估算位置。</string>
 </resources>

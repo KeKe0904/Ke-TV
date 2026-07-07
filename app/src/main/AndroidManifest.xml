@@ -5,6 +5,9 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- 用于 in-app 更新：让 APP 能触发系统安装器安装下载好的 APK -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- 用于天气：优先通过定位获取当地天气（定位失败时回退到 IP 自动定位） -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <!-- TV 可选：让 APP 同时能装到 TV 和手机上 -->
     <uses-feature android:name="android.software.leanback" android:required="false" />
@@ -48,6 +51,13 @@
             android:exported="false"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:theme="@style/Theme.TVToolbox.Fullscreen" />
+
+        <!-- 浏览器：基于系统 WebView（Chrome / Chromium 内核） -->
+        <activity
+            android:name=".BrowserActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:parentActivityName=".MainActivity" />
 
         <!-- FileProvider：用于把 in-app 下载的 APK 安全地分享给系统安装器 -->
         <provider
