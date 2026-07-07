@@ -83,7 +83,7 @@ object AppDialog {
      * @param onSelected 选择回调（传入新选中项索引）
      * @param positiveText 确认按钮文案
      * @param negativeText 取消按钮文案
-     * @param instantApply true 时（TV 默认）：选中即应用并关闭对话框，无需点确认按钮
+     * @param instantApply 已废弃，保留参数为兼容旧调用方。当前固定走普通模式（点确认才生效）。
      */
     fun showSingleChoice(
         context: Context,
@@ -93,46 +93,26 @@ object AppDialog {
         onSelected: (Int) -> Unit,
         positiveText: CharSequence? = context.getString(R.string.dialog_ok),
         negativeText: CharSequence? = context.getString(R.string.dialog_cancel),
-        instantApply: Boolean = FocusHelper.isTv(context)
+        @Suppress("UNUSED_PARAMETER") instantApply: Boolean = false
     ): Dialog {
         val (view, radioGroup) = createChoiceListView(context, entries, checkedIndex)
         var selected = checkedIndex
-        // instantApply 模式（TV 默认）：D-pad 上下移动焦点时，焦点落到 RadioButton 立即应用并关闭
-        // 这是 TV 体验简化：用户按上下方向键直接切换值，无需再按"确认"
-        if (instantApply) {
-            for (i in 0 until radioGroup.childCount) {
-                val child = radioGroup.getChildAt(i) as? RadioButton ?: continue
-                child.setOnFocusChangeListener { v, hasFocus ->
-                    if (hasFocus && v is RadioButton) {
-                        val idx = v.id - 1
-                        if (idx != selected) {
-                            selected = idx
-                            onSelected(selected.coerceIn(0, entries.size - 1))
-                            v.postDelayed({
-                                (radioGroup.tag as? Dialog)?.dismiss()
-                            }, 180) // 让用户看到选中态视觉反馈
-                        }
-                    }
-                }
-            }
-            // instantApply 模式不需要确认按钮，只需取消按钮
-            return createAndShow(
-                context = context,
-                title = title,
-                contentView = view,
-                positiveText = null,
-                onPositive = null,
-                negativeText = negativeText,
-                onNegative = null,
-                cancelable = true
-            ).also { dialog ->
-                radioGroup.tag = dialog
-            }
-        }
-
-        // 普通模式（手机端）：选项目 → 按确认按钮才应用
+        // 普通模式（手机 + TV 都用此模式）：
+        // - D-pad 上下移动焦点
+        // - D-pad 中央键 / 回车键 / 点击 → check 当前 RadioButton（不关闭对话框）
+        // - 按「确认」按钮 → 应用 selected + 关闭
+        // 这是用户明确要求的：「点击确定才能生效，不要一滑动就默认确定」
         radioGroup.setOnCheckedChangeListener { _, id ->
             selected = id - 1
+        }
+        // 给每个 RadioButton 显式 OnClickListener：
+        // 在 TV 上 D-pad 中央键 / 回车键 会触发 OnClickListener，
+        // 让 RadioGroup.check(it.id) 选中当前 RadioButton（不关闭对话框）
+        for (i in 0 until radioGroup.childCount) {
+            val child = radioGroup.getChildAt(i) as? RadioButton ?: continue
+            child.setOnClickListener {
+                radioGroup.check(it.id)
+            }
         }
         return createAndShow(
             context = context,
