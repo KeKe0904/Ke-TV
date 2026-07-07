@@ -72,30 +72,15 @@ class SettingsActivity : AppCompatActivity() {
     private fun bindRows() {
         val isTv = FocusHelper.isTv(this)
 
-        // 图床类型：TV 上按左右键直接在值之间循环切换，无需打开对话框
+        // 图床类型：暂时固定为「单图 URL」，不允许切换
+        // （用户要求："图床类型暂时选不了"，只保留 URL 选项）
+        // 仍然显示该行作为信息展示，但不可点击、不响应 D-pad 切换
         findViewById<View>(R.id.rowSourceMode).also { row ->
-            row.setOnClickListener { showSourceModeDialog() }
-            FocusHelper.setupFocus(row)
-            if (isTv) {
-                row.setOnKeyListener { v, keyCode, event ->
-                    // 保留 setupFocus 的 D-pad 确认键按压反馈
-                    FocusHelper.handleConfirmKeyFeedback(v, keyCode, event)
-                    if (event.action == KeyEvent.ACTION_UP &&
-                        (keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT)
-                    ) {
-                        val cur = Prefs.sourceMode(this)
-                        val idx = sourceModeValues.indexOf(cur).coerceAtLeast(0)
-                        val newIdx = if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
-                            (idx + 1) % sourceModeValues.size
-                        } else {
-                            (idx - 1 + sourceModeValues.size) % sourceModeValues.size
-                        }
-                        Prefs.setSourceMode(this, sourceModeValues[newIdx])
-                        refreshUi()
-                        return@setOnKeyListener true
-                    }
-                    false
-                }
+            row.isClickable = false
+            row.isFocusable = false
+            // 强制写回 single 模式，保证一致性
+            if (Prefs.sourceMode(this) != "single") {
+                Prefs.setSourceMode(this, "single")
             }
         }
 
@@ -186,22 +171,22 @@ class SettingsActivity : AppCompatActivity() {
             FocusHelper.setupFocus(it)
         }
         // 系统屏保设置
+        // v1.7.4：改为引导式，告诉用户如何把本应用设为系统屏保
+        // （小米/红米 TV 等通常需要用户在系统设置中手动选中本应用）
         findViewById<View>(R.id.rowDreamSettings).also {
-            it.setOnClickListener { openDreamSettings() }
+            it.setOnClickListener { guideSetAsSystemDream() }
             FocusHelper.setupFocus(it)
         }
 
-        // TV 进入设置页时，默认聚焦到第一个 row（让遥控器有起点）
-        FocusHelper.requestInitialFocus(findViewById(R.id.rowSourceMode))
+        // TV 进入设置页时，默认聚焦到第一个可聚焦 row（让遥控器有起点）
+        // v1.7.4：rowSourceMode 已不可聚焦，改为聚焦到 rowImageUrl
+        FocusHelper.requestInitialFocus(findViewById(R.id.rowImageUrl))
     }
 
     /** 刷新所有行的显示状态。 */
     private fun refreshUi() {
-        // 图床类型
-        val mode = Prefs.sourceMode(this)
-        val modeIdx = sourceModeValues.indexOf(mode).coerceAtLeast(0)
-        val modeText = if (modeIdx in sourceModeEntries.indices) sourceModeEntries[modeIdx]
-            else getString(R.string.pref_source_mode_single)
+        // 图床类型：固定为「单图 URL（固定）」，提示用户暂时不可切换
+        val modeText = getString(R.string.pref_source_mode_fixed)
         findViewById<android.widget.TextView>(R.id.tvSourceModeValue).text = modeText
 
         // URL：用户未自定义时显示"默认图床"提示，但仍可点击查看/修改
@@ -316,6 +301,38 @@ class SettingsActivity : AppCompatActivity() {
                 negativeText = getString(R.string.dialog_cancel)
             )
         }
+    }
+
+    /**
+     * 引导用户把本应用设为系统屏保（v1.7.4 新增）。
+     *
+     * 小米 / 红米 TV 等电视系统通常不允许 APP 直接修改系统屏保配置，
+     * 必须用户在系统设置中手动选中本应用。这里：
+     * 1. 跳转到系统屏保设置页（如果可达）
+     * 2. 显示引导对话框，告诉用户如何选中本应用
+     */
+    private fun guideSetAsSystemDream() {
+        // 先显示引导对话框
+        showAppMessage(
+            title = getString(R.string.dream_guide_title),
+            message = getString(R.string.dream_guide_message),
+            positiveText = getString(R.string.dream_guide_open_settings),
+            onPositive = {
+                val ok = try {
+                    DreamSettingsHelper.openDreamPicker(this)
+                } catch (_: Throwable) {
+                    false
+                }
+                if (!ok) {
+                    // 兜底：直接预览本应用屏保
+                    try { DreamSettingsHelper.triggerScreensaverNow(this) } catch (_: Throwable) {}
+                }
+            },
+            negativeText = getString(R.string.dream_guide_preview_now),
+            onNegative = {
+                try { DreamSettingsHelper.triggerScreensaverNow(this) } catch (_: Throwable) {}
+            }
+        )
     }
 
     override fun onDestroy() {

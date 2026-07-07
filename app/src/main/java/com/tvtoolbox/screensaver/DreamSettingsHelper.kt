@@ -5,7 +5,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.os.SystemClock
 import android.provider.Settings
 
 /**
@@ -16,12 +15,16 @@ import android.provider.Settings
  *
  * 1. ACTION_DREAM_SETTINGS（标准 Android 入口）
  * 2. com.android.settings.Settings$DreamSettingsActivity（直接组件名）
- * 3. 小米 TV 的屏保设置 Activity（如有）
+ * 3. 小米 TV 的屏保设置 Activity（多种组件名尝试）
  * 4. ACTION_SETTINGS（系统设置首页，让用户手动找）
  * 5. 都失败：提示用户用「立即进入屏保」功能测试
  *
  * 「立即进入屏保」用 DreamManager / AlarmManager trick 触发系统屏保，
  * 或直接启动我们自己的 PhotoDreamService 全屏预览（保证可用）。
+ *
+ * v1.7.4 新增：
+ * - 小米 TV 屏保设置 Activity 多个候选组件名（覆盖不同 MIUI 版本）
+ * - setAsSystemDream：跳转到系统屏保选择页 + 提示如何选中本应用
  */
 object DreamSettingsHelper {
 
@@ -30,6 +33,66 @@ object DreamSettingsHelper {
      * 内部已尝试多种 Intent，调用方只需判断结果。
      */
     fun openDreamSettings(context: Context): Boolean {
+        val candidates = buildList {
+            // 标准 Android 入口
+            add(Intent(Settings.ACTION_DREAM_SETTINGS))
+            // AOSP 直接组件名
+            add(Intent().setComponent(
+                ComponentName(
+                    "com.android.settings",
+                    "com.android.settings.Settings\$DreamSettingsActivity"
+                )
+            ))
+            // 小米 / 红米 TV 多个候选（覆盖不同 MIUI 版本）
+            add(Intent().setComponent(
+                ComponentName(
+                    "com.xiaomi.mitv.settings",
+                    "com.xiaomi.mitv.settings.SettingsActivity"
+                )
+            ))
+            add(Intent().setComponent(
+                ComponentName(
+                    "com.xiaomi.mitv.tvmanager",
+                    "com.xiaomi.mitv.tvmanager.MainActivity"
+                )
+            ))
+            add(Intent().setComponent(
+                ComponentName(
+                    "com.mitv.tvmanager",
+                    "com.mitv.tvmanager.MainActivity"
+                )
+            ))
+            // 小米电视管家（屏保设置入口在部分 MIUI for TV 版本中）
+            add(Intent().setComponent(
+                ComponentName(
+                    "com.xiaomi.mitv.tvmanager",
+                    "com.xiaomi.mitv.tvmanager.module.tvsetting.TvSettingActivity"
+                )
+            ))
+            // 通用 settings 入口
+            add(Intent(Settings.ACTION_SETTINGS))
+        }
+
+        for (intent in candidates) {
+            try {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(intent)
+                return true
+            } catch (_: Throwable) {
+                // 试下一个
+            }
+        }
+        return false
+    }
+
+    /**
+     * 跳转到系统屏保选择页 + 提示用户如何选中本应用。
+     *
+     * 1. 尝试 ACTION_DREAM_SETTINGS（标准入口）
+     * 2. 失败：返回 false，调用方显示提示
+     */
+    fun openDreamPicker(context: Context): Boolean {
+        // 优先尝试标准 ACTION_DREAM_SETTINGS
         val candidates = listOf(
             Intent(Settings.ACTION_DREAM_SETTINGS),
             Intent().setComponent(
@@ -38,17 +101,14 @@ object DreamSettingsHelper {
                     "com.android.settings.Settings\$DreamSettingsActivity"
                 )
             ),
-            // 小米 TV 部分版本
+            // 小米 TV 屏保设置
             Intent().setComponent(
                 ComponentName(
                     "com.xiaomi.mitv.settings",
                     "com.xiaomi.mitv.settings.SettingsActivity"
                 )
-            ),
-            // 通用 settings 入口
-            Intent(Settings.ACTION_SETTINGS)
+            )
         )
-
         for (intent in candidates) {
             try {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

@@ -126,6 +126,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // v1.7.4 修复主页泛白问题：
+        // 从子 Activity 返回时，Activity transition 期间会短暂显示纯白
+        // （LiquidBackgroundView 的 canvas.drawColor(white) 已画但光晕未画）
+        // 修复：onResume 立即 invalidate 背景，强制重绘光晕
+        findViewById<LiquidBackgroundView?>(R.id.liquidBackground)?.let {
+            it.invalidate()
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         scope.cancel()

@@ -116,6 +116,10 @@ class LiquidBackgroundView @JvmOverloads constructor(
         if (visibility == VISIBLE && isAttachedToWindow) {
             Choreographer.getInstance().removeFrameCallback(frameCallback)
             Choreographer.getInstance().postFrameCallback(frameCallback)
+            // v1.7.4 修复主页返回后泛白问题：
+            // Activity 从后台/子 Activity 返回时，window 重新可见，
+            // 立即 invalidate 触发一次重绘，避免纯白底色闪烁
+            invalidate()
         } else {
             Choreographer.getInstance().removeFrameCallback(frameCallback)
         }

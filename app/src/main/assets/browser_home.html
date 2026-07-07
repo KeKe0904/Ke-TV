@@ -229,15 +229,18 @@
             <div class="logo-subtitle">B R O W S E R &nbsp;·&nbsp; 二 次 元 工 具 箱</div>
         </div>
 
-        <form class="search-form" id="searchForm" action="https://www.bing.com/search" method="GET" target="_self">
+        <form class="search-form" id="searchForm" action="https://www.bing.com/search" method="GET" target="_self" aria-hidden="true">
             <svg class="search-icon" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
             </svg>
-            <input type="text" class="search-input" name="q" placeholder="必应搜索或输入网址" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
-            <button type="submit" class="search-btn">搜索</button>
+            <!-- 起始页 input 设为 readonly + tabindex=-1 + aria-hidden
+                 用户搜索/输入网址改用 APP 顶部地址栏 etUrl（避免"两个输入框"困惑）
+                 保留视觉布局（占位 + 图标），但不接受焦点和输入 -->
+            <input type="text" class="search-input" name="q" placeholder="使用顶部地址栏搜索或输入网址" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" readonly tabindex="-1">
+            <button type="submit" class="search-btn" tabindex="-1" disabled>搜索</button>
         </form>
 
-        <div class="hint">输入关键词 → 必应搜索 · 输入网址 → 直接跳转</div>
+        <div class="hint">使用 APP 顶部地址栏：输入关键词 → 必应搜索 · 输入网址 → 直接跳转</div>
 
         <div class="quick-links">
             <a class="quick-link" href="https://www.bing.com">必应</a>
@@ -251,28 +254,15 @@
     <div class="footer">背景图：t.alcy.cc · 必应搜索</div>
 
     <script>
-        // 启动后自动聚焦搜索框
-        window.addEventListener('load', function() {
-            var input = document.querySelector('.search-input');
-            if (input) {
-                setTimeout(function() { input.focus(); }, 200);
-            }
-        });
+        // 不再自动聚焦 HTML input：
+        // 起始页的 input 已设为 readonly + tabindex=-1
+        // 搜索/输入网址改用 APP 顶部原生地址栏 etUrl（避免"两个输入框"困惑）
 
-        // 拦截表单提交：
-        // - 看起来像 URL → 直接跳转（form 不会处理）
+        // 拦截表单提交（保留兜底，万一有键盘事件触发）：
+        // - 看起来像 URL → 直接跳转
         // - 否则按 form 默认行为走 bing.com/search?q=...
         document.getElementById('searchForm').addEventListener('submit', function(e) {
-            var input = document.querySelector('.search-input');
-            var val = (input.value || '').trim();
-            if (!val) {
-                e.preventDefault();
-                return;
-            }
-            if (isUrl(val)) {
-                e.preventDefault();
-                window.location.href = normalizeUrl(val);
-            }
+            e.preventDefault();
         });
 
         function isUrl(s) {

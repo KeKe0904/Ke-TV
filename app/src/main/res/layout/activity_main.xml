@@ -25,6 +25,7 @@
 
     <!-- 液态背景层：占满全屏（不受系统栏 inset 影响） -->
     <com.tvtoolbox.screensaver.LiquidBackgroundView
+        android:id="@+id/liquidBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
