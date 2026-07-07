@@ -49,7 +49,9 @@ class SettingsActivity : AppCompatActivity() {
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(false)
             setDisplayShowHomeEnabled(false)
-            title = getString(R.string.settings_title)
+            // 用户要求顶部状态栏不显示任何文字
+            setDisplayShowTitleEnabled(false)
+            title = ""
         }
         // toolbar 单独处理状态栏 inset（顶部 padding）
         val toolbar = findViewById<View>(R.id.toolbar_settings)
@@ -202,9 +204,13 @@ class SettingsActivity : AppCompatActivity() {
             else getString(R.string.pref_source_mode_single)
         findViewById<android.widget.TextView>(R.id.tvSourceModeValue).text = modeText
 
-        // URL
+        // URL：用户未自定义时显示"默认图床"提示，但仍可点击查看/修改
         val url = Prefs.imageUrl(this)
-        val urlText = if (url.isBlank()) getString(R.string.pref_image_url_summary) else url
+        val urlText = if (Prefs.isUsingDefaultImageUrl(this)) {
+            getString(R.string.pref_image_url_default)
+        } else {
+            url
+        }
         findViewById<android.widget.TextView>(R.id.tvImageUrlValue).text = urlText
 
         // 间隔
@@ -240,6 +246,7 @@ class SettingsActivity : AppCompatActivity() {
         showAppInput(
             title = getString(R.string.dialog_url_title),
             hint = getString(R.string.pref_image_url_hint),
+            // 初始文本展示当前实际生效的 URL（包括默认值），方便用户在其基础上修改
             initialText = Prefs.imageUrl(this),
             onSave = { newUrl ->
                 Prefs.setImageUrl(this, newUrl)
@@ -269,10 +276,6 @@ class SettingsActivity : AppCompatActivity() {
     /** 测试图床连通性。 */
     private fun doTest() {
         val url = Prefs.imageUrl(this)
-        if (url.isBlank()) {
-            Toast.makeText(this, R.string.no_url, Toast.LENGTH_SHORT).show()
-            return
-        }
         val tv = findViewById<android.widget.TextView>(R.id.tvTestTitle)
         val original = tv.text
         tv.text = getString(R.string.test_running)

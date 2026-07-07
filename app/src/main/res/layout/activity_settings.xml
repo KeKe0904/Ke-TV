@@ -31,9 +31,10 @@
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar_settings"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/toolbar_height"
+            android:layout_height="wrap_content"
+            android:minHeight="0dp"
             android:background="@android:color/transparent"
-            app:titleTextColor="@color/text_primary" />
+            app:title="" />
 
         <ScrollView
             android:layout_width="match_parent"

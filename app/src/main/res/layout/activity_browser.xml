@@ -25,16 +25,16 @@
         android:clipChildren="false"
         android:clipToPadding="false">
 
-        <!-- 顶部 Toolbar：标题（无返回按钮，依靠系统返回） -->
+        <!-- 顶部 Toolbar：仅占位处理状态栏 inset，不显示任何文字/按钮 -->
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/toolbar_height"
+            android:layout_height="wrap_content"
+            android:minHeight="0dp"
             android:background="@android:color/transparent"
-            android:title="@string/browser_title"
-            app:titleTextColor="@color/text_primary" />
+            app:title="" />
 
-        <!-- 地址栏容器 -->
+        <!-- 地址栏容器：浏览器唯一输入框（搜索+输入网址） -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -65,7 +65,7 @@
                 android:tint="@color/text_primary"
                 android:contentDescription="@string/browser_forward" />
 
-            <!-- 地址栏 / 搜索框 -->
+            <!-- 地址栏 / 搜索框（浏览器唯一输入框） -->
             <EditText
                 android:id="@+id/etUrl"
                 android:layout_width="0dp"

@@ -40,7 +40,9 @@ class AppSettingsActivity : AppCompatActivity() {
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(false)
             setDisplayShowHomeEnabled(false)
-            title = getString(R.string.app_settings_title)
+            // 用户要求顶部状态栏不显示任何文字
+            setDisplayShowTitleEnabled(false)
+            title = ""
         }
         // toolbar 单独处理状态栏 inset
         val toolbar = findViewById<View>(R.id.toolbar_settings)

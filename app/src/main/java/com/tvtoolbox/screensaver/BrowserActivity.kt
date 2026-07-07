@@ -1,6 +1,7 @@
 package com.tvtoolbox.screensaver
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.KeyEvent
@@ -199,9 +200,8 @@ class BrowserActivity : AppCompatActivity() {
 
             override fun onReceivedTitle(view: WebView?, title: String?) {
                 super.onReceivedTitle(view, title)
-                if (!title.isNullOrBlank()) {
-                    toolbar.title = title
-                }
+                // 用户要求：顶部状态栏不显示任何文字
+                // 不把网页 title 设置到 toolbar，保持 toolbar 完全空白
             }
         }
     }
@@ -211,6 +211,19 @@ class BrowserActivity : AppCompatActivity() {
         FocusHelper.setupFocusAll(btnBack, btnForward, btnRefresh, btnHome, btnGo)
         // 首次聚焦到地址栏，方便立刻输入
         etUrl.postDelayed({ etUrl.requestFocus() }, 200)
+
+        // TV 端关键修复：地址栏点击/聚焦时主动弹起 IME
+        // 部分 TV ROM 在 D-pad 聚焦到 EditText 时不会自动弹 IME，需要主动触发
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE)
+            as? android.view.inputmethod.InputMethodManager
+        val showIme = {
+            try {
+                etUrl.requestFocus()
+                imm?.showSoftInput(etUrl, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+            } catch (_: Throwable) {}
+        }
+        etUrl.setOnClickListener { showIme() }
+        etUrl.setOnFocusChangeListener { _, hasFocus -> if (hasFocus) showIme() }
 
         btnBack.setOnClickListener {
             if (webView.canGoBack()) webView.goBack()
@@ -250,7 +263,7 @@ class BrowserActivity : AppCompatActivity() {
     private fun loadHomePage() {
         webView.loadUrl(HOME_PAGE_URL)
         etUrl.setText("")
-        toolbar.title = getString(R.string.browser_title)
+        // toolbar 不显示任何文字（用户要求顶部状态栏完全空白）
     }
 
     /** 解析地址栏输入并加载：URL 直接跳转 / 关键词走搜索引擎。 */

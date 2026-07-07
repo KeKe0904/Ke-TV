@@ -93,10 +93,6 @@ class PhotoSlideshowController(
             .build()
 
         val url = Prefs.imageUrl(context)
-        if (url.isBlank()) {
-            showHint(context.getString(R.string.no_url))
-            return
-        }
 
         showHint(context.getString(R.string.loading))
         singleMode = Prefs.sourceMode(context) != "json"

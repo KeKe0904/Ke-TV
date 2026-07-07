@@ -9,8 +9,15 @@ object Prefs {
     fun get(context: Context): SharedPreferences =
         context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
 
+    /** 默认图床 URL：用户未设置时使用此默认值，保证屏保开箱即用 */
+    const val DEFAULT_IMAGE_URL = "https://t.alcy.cc/ycy"
+
     fun imageUrl(context: Context): String =
-        get(context).getString("image_url", "") ?: ""
+        get(context).getString("image_url", DEFAULT_IMAGE_URL) ?: DEFAULT_IMAGE_URL
+
+    /** 是否使用默认图床（用户未自定义） */
+    fun isUsingDefaultImageUrl(context: Context): Boolean =
+        get(context).getString("image_url", null) == null
 
     fun setImageUrl(context: Context, value: String) =
         get(context).edit().putString("image_url", value).apply()

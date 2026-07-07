@@ -170,23 +170,31 @@ object AppDialog {
             onNegative = null,
             cancelable = true
         )
-        // 仅在手机端自动聚焦输入框并弹软键盘
-        // TV 上 requestFocus + showSoftInput 会触发不存在 IME 的异常，
-        // 导致 dialog 显示失败或被系统回收 → 用户感觉"点了就回首页"
-        if (!FocusHelper.isTv(context)) {
+        // TV 端关键修复：用户反馈"电视端点击后不会跳出电视自带的键盘"
+        // 之前为防 NPE 让 TV 不主动聚焦 EditText，结果 TV 上根本不弹 IME。
+        // 现在：dialog 显示后让 EditText 主动 requestFocus，
+        // 并通过 InputMethodManager.showSoftInputWithFlags 强制弹起 IME。
+        // 即使某些 TV 没有配置输入法，showSoftInput 失败也不会崩溃（已加 try-catch）。
+        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE)
+            as? android.view.inputmethod.InputMethodManager
+        val showIme = {
             try {
                 editText.requestFocus()
-                editText.postDelayed({
-                    (context.getSystemService(Context.INPUT_METHOD_SERVICE)
-                        as android.view.inputmethod.InputMethodManager)
-                        .showSoftInput(editText, 0)
-                }, 200)
+                imm?.showSoftInput(editText, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
             } catch (_: Throwable) {
                 // 即使 IME 启动失败也不影响 dialog 显示
             }
         }
-        // TV：默认聚焦到「保存」按钮，用户按 D-pad 上下到输入框才聚焦输入框
-        // （此时系统的 IME 会被自然触发，不会异常）
+        // 给 EditText 加点击/聚焦监听：用户点击或聚焦时主动弹 IME
+        // （TV 上 D-pad 聚焦到 EditText 后，部分 ROM 不会自动弹 IME，需要主动触发）
+        editText.setOnClickListener { showIme() }
+        editText.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) showIme()
+        }
+        // 关键：用 postDelayed 延迟 350ms，确保在 createAndShow 内部 post 的
+        // "自动聚焦到 Button"逻辑执行完后再 requestFocus 到 EditText
+        // （否则会被 createAndShow 的 post 覆盖，导致聚焦到保存按钮而非输入框）
+        editText.postDelayed({ showIme() }, 350)
         return dialog
     }
 
