@@ -42,8 +42,10 @@ object UpdateChecker {
      * 检查更新。失败抛异常，调用方自行处理。
      */
     fun check(context: Context): Result {
-        val currentVersionCode = getVersionCode(context)
         val currentVersionName = getVersionName(context)
+        // 关键修复：用同一套 versionName 解析规则比较，避免与 versionCode 编号不一致导致永远提示更新
+        // 之前 bug：parseVersionCode("v1.6.1")=10601 与 versionCode=11 比较，永远大于，永远提示有更新
+        val currentVersionParsed = parseVersionCode(currentVersionName)
 
         val request = Request.Builder()
             .url(RELEASES_API)
@@ -83,24 +85,16 @@ object UpdateChecker {
                 }
             }
 
-            Log.d(TAG, "current=$currentVersionCode latest=$latestVersionCode tag=$tagName")
+            Log.d(TAG, "current=$currentVersionParsed latest=$latestVersionCode tag=$tagName")
 
             return Result(
-                hasUpdate = latestVersionCode > currentVersionCode,
+                hasUpdate = latestVersionCode > currentVersionParsed,
                 latestVersion = latestVersionName,
                 currentVersion = currentVersionName,
                 downloadUrl = downloadUrl,
                 releaseNotes = releaseNotes,
                 isPrerelease = isPrerelease
             )
-        }
-    }
-
-    private fun getVersionCode(context: Context): Int {
-        return try {
-            context.packageManager.getPackageInfo(context.packageName, 0).longVersionCode.toInt()
-        } catch (e: PackageManager.NameNotFoundException) {
-            0
         }
     }
 

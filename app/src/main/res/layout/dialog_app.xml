@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    应用内置弹窗容器布局。
+    被 AppDialog 用作 root view，内层自己 inflate 消息/列表/输入内容。
+
+    设计：玻璃质感 + 圆角 + 应用配色，与系统 AlertDialog 视觉差异明显
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent"
+    android:paddingHorizontal="24dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/dialog_glass_bg"
+        android:paddingTop="24dp"
+        android:paddingBottom="8dp"
+        android:paddingHorizontal="24dp">
+
+        <!-- 标题 -->
+        <TextView
+            android:id="@+id/tvDialogTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_primary"
+            android:textSize="20sp"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.02"
+            tools:ignore="MissingDefaultResource"
+            xmlns:tools="http://schemas.android.com/tools" />
+
+        <!-- 消息内容容器：消息文案 / 自定义内容 / 选项列表都塞这里 -->
+        <FrameLayout
+            android:id="@+id/dialogContentContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- 按钮容器 -->
+        <LinearLayout
+            android:id="@+id/dialogButtonContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end|center_vertical"
+            android:layout_marginTop="4dp"
+            android:paddingEnd="4dp"
+            android:paddingBottom="4dp">
+
+            <!-- Negative / Positive 按钮动态添加 -->
+        </LinearLayout>
+
+    </LinearLayout>
+</FrameLayout>

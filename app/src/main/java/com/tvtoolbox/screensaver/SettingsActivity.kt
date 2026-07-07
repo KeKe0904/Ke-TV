@@ -1,13 +1,10 @@
 package com.tvtoolbox.screensaver
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.materialswitch.MaterialSwitch
-import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -23,11 +20,6 @@ import kotlinx.coroutines.withContext
  * - 测试连通性 / 系统屏保设置
  *
  * 主题模式与软件更新已迁移到 [AppSettingsActivity]，因为它们属于软件本身而非屏保功能。
- *
- * 不再使用 PreferenceFragment 的理由：
- * 1. EditTextPreference 在某些主题下对话框不弹出（之前的 bug）
- * 2. 液态玻璃 UI 用 PreferenceFragment 难以定制
- * 3. 自定义逻辑更可控、更可调试
  */
 class SettingsActivity : AppCompatActivity() {
 
@@ -51,7 +43,6 @@ class SettingsActivity : AppCompatActivity() {
             setDisplayHomeAsUpEnabled(true)
             title = getString(R.string.settings_title)
         }
-        // 用自定义返回图标，覆盖默认
         findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar_settings)
             .setNavigationOnClickListener { finish() }
 
@@ -146,53 +137,48 @@ class SettingsActivity : AppCompatActivity() {
     private fun showSourceModeDialog() {
         val cur = Prefs.sourceMode(this)
         val checked = sourceModeValues.indexOf(cur).coerceAtLeast(0)
-        MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.dialog_source_mode_title)
-            .setSingleChoiceItems(sourceModeEntries, checked) { dialog, which ->
+        showAppSingleChoice(
+            title = getString(R.string.dialog_source_mode_title),
+            entries = sourceModeEntries,
+            checkedIndex = checked,
+            onSelected = { which ->
                 if (which in sourceModeValues.indices) {
                     Prefs.setSourceMode(this, sourceModeValues[which])
                     refreshUi()
                 }
-                dialog.dismiss()
             }
-            .setNegativeButton(R.string.dialog_cancel, null)
-            .show()
+        )
     }
 
-    /** 图床 URL 输入对话框（修复 v1.1 点击无反应的 bug）。 */
+    /** 图床 URL 输入对话框。 */
     private fun showUrlDialog() {
-        val view = LayoutInflater.from(this).inflate(R.layout.dialog_url_input, null, false)
-        val et = view.findViewById<TextInputEditText>(R.id.etUrl)
-        et.setText(Prefs.imageUrl(this))
-
-        MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.dialog_url_title)
-            .setView(view)
-            .setPositiveButton(R.string.dialog_save) { _, _ ->
-                val newUrl = et.text?.toString()?.trim() ?: ""
+        showAppInput(
+            title = getString(R.string.dialog_url_title),
+            hint = getString(R.string.pref_image_url_hint),
+            initialText = Prefs.imageUrl(this),
+            onSave = { newUrl ->
                 Prefs.setImageUrl(this, newUrl)
                 refreshUi()
                 Toast.makeText(this, R.string.dialog_save, Toast.LENGTH_SHORT).show()
             }
-            .setNegativeButton(R.string.dialog_cancel, null)
-            .show()
+        )
     }
 
     /** 切换间隔单选对话框。 */
     private fun showIntervalDialog() {
         val cur = Prefs.intervalSeconds(this)
         val checked = intervalValues.indexOfFirst { it.toIntOrNull() == cur }
-        MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.dialog_interval_title)
-            .setSingleChoiceItems(intervalEntries, checked) { dialog, which ->
+        showAppSingleChoice(
+            title = getString(R.string.dialog_interval_title),
+            entries = intervalEntries,
+            checkedIndex = checked,
+            onSelected = { which ->
                 intervalValues[which].toIntOrNull()?.let { secs ->
                     Prefs.setIntervalSeconds(this, secs)
                     refreshUi()
                 }
-                dialog.dismiss()
             }
-            .setNegativeButton(R.string.dialog_cancel, null)
-            .show()
+        )
     }
 
     /** 测试图床连通性。 */

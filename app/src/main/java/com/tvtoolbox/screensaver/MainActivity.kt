@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -146,14 +145,13 @@ class MainActivity : AppCompatActivity() {
         val ok = DreamSettingsHelper.openDreamSettings(this)
         if (!ok) {
             // 所有 Intent 都失败，提示用户用「立即进入屏保」
-            AlertDialog.Builder(this)
-                .setTitle(R.string.card_dream_settings_title)
-                .setMessage(R.string.dream_settings_fallback)
-                .setPositiveButton(R.string.card_start_screensaver_title) { _, _ ->
-                    DreamSettingsHelper.triggerScreensaverNow(this)
-                }
-                .setNegativeButton(R.string.dialog_cancel, null)
-                .show()
+            showAppMessage(
+                title = getString(R.string.card_dream_settings_title),
+                message = getString(R.string.dream_settings_fallback),
+                positiveText = getString(R.string.card_start_screensaver_title),
+                onPositive = { DreamSettingsHelper.triggerScreensaverNow(this) },
+                negativeText = getString(R.string.dialog_cancel)
+            )
         }
     }
 }

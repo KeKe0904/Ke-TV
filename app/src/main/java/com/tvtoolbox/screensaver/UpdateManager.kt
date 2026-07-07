@@ -5,8 +5,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.util.Log
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.appcompat.app.AlertDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -101,14 +101,15 @@ object UpdateManager {
             prereleaseTag
         )
 
-        AlertDialog.Builder(activity)
-            .setTitle(R.string.update_dialog_title)
-            .setMessage(message)
-            .setPositiveButton(R.string.update_dialog_download) { _, _ ->
-                startDownload(activity, result, scope)
-            }
-            .setNegativeButton(R.string.update_dialog_later, null)
-            .show()
+        AppDialog.showMessage(
+            context = activity,
+            title = activity.getString(R.string.update_dialog_title),
+            message = message,
+            positiveText = activity.getString(R.string.update_dialog_download),
+            onPositive = { startDownload(activity, result, scope) },
+            negativeText = activity.getString(R.string.update_dialog_later),
+            cancelable = true
+        )
     }
 
     /**
@@ -125,9 +126,12 @@ object UpdateManager {
         if (targetFile.exists()) targetFile.delete()
 
         // 进度对话框容器：横向进度条 + 进度文案
+        val density = activity.resources.displayMetrics.density
         val container = android.widget.LinearLayout(activity).apply {
             orientation = android.widget.LinearLayout.VERTICAL
-            setPadding(56, 32, 56, 16)
+            val hPad = (8 * density).toInt()
+            val vPad = (4 * density).toInt()
+            setPadding(hPad, vPad, hPad, vPad)
         }
         val progressBar = android.widget.ProgressBar(activity, null, android.R.attr.progressBarStyleHorizontal).apply {
             max = 100
@@ -141,29 +145,33 @@ object UpdateManager {
         }
         val progressText = android.widget.TextView(activity).apply {
             text = activity.getString(R.string.update_downloading_indeterminate)
-            setTextColor(android.graphics.Color.GRAY)
+            setTextColor(ContextCompat.getColor(activity, R.color.text_tertiary))
             textSize = 13f
             val lp = android.widget.LinearLayout.LayoutParams(
                 android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
                 android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            lp.topMargin = 16
+            lp.topMargin = (12 * density).toInt()
             layoutParams = lp
         }
         container.addView(progressBar)
         container.addView(progressText)
 
-        val dialog = AlertDialog.Builder(activity)
-            .setTitle(R.string.update_downloading_title)
-            .setView(container)
-            .setCancelable(false)
-            .setNegativeButton(R.string.dialog_cancel) { d, _ ->
-                d.dismiss()
-            }
-            .show()
+        // 用 AppDialog.showCustom 自定义视图，保留 dialog 引用以便取消
+        // 用 holder 让取消按钮能引用到 downloadJob（job 在 dialog 之后才创建）
+        val jobHolder = arrayOf<Job?>(null)
+        val dialog = AppDialog.showCustom(
+            context = activity,
+            title = activity.getString(R.string.update_downloading_title),
+            contentView = container,
+            negativeText = activity.getString(R.string.dialog_cancel),
+            onNegative = {
+                jobHolder[0]?.cancel()
+            },
+            cancelable = false
+        )
 
-        var downloadJob: Job? = null
-        downloadJob = scope.launch {
+        val downloadJob = scope.launch {
             val outcome = withContext(Dispatchers.IO) {
                 downloadApk(result.downloadUrl, targetFile) { read, total ->
                     if (total > 0) {
@@ -188,7 +196,7 @@ object UpdateManager {
             }
 
             // 关闭进度对话框
-            progressBar.post { dialog.dismiss() }
+            progressBar.post { if (dialog.isShowing) dialog.dismiss() }
 
             when (outcome) {
                 is DownloadResult.Success -> {
@@ -206,12 +214,7 @@ object UpdateManager {
                 }
             }
         }
-
-        // 用户取消按钮 → 取消下载 job
-        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
-            downloadJob?.cancel()
-            dialog.dismiss()
-        }
+        jobHolder[0] = downloadJob
     }
 
     private fun onStatusChange(activity: Activity, message: CharSequence) {

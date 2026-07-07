@@ -74,7 +74,10 @@ object FocusHelper {
         }
 
         view.isFocusable = true
-        view.isFocusableInTouchMode = true
+        // 关键修复：手机端关闭 touch-mode focusable
+        // 之前 isFocusableInTouchMode=true 会导致首次点击只获取焦点而不触发 OnClickListener，
+        // 用户必须点两次才能进入功能。TV 上保留 true（D-pad 导航需要），手机上设为 false。
+        view.isFocusableInTouchMode = isTv
     }
 
     /**
