@@ -1,9 +1,6 @@
 package com.tvtoolbox.screensaver
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Toast
@@ -19,9 +16,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * 设置页（自定义布局，不再用 PreferenceFragment）。
+ * 屏保设置页（屏保功能本身的配置）。
  *
- * 这样做的理由：
+ * 仅保留与屏保直接相关的设置：
+ * - 图床类型 / 图床 URL / 切换间隔 / 随机顺序 / Ken Burns
+ * - 测试连通性 / 系统屏保设置
+ *
+ * 主题模式与软件更新已迁移到 [AppSettingsActivity]，因为它们属于软件本身而非屏保功能。
+ *
+ * 不再使用 PreferenceFragment 的理由：
  * 1. EditTextPreference 在某些主题下对话框不弹出（之前的 bug）
  * 2. 液态玻璃 UI 用 PreferenceFragment 难以定制
  * 3. 自定义逻辑更可控、更可调试
@@ -37,10 +40,6 @@ class SettingsActivity : AppCompatActivity() {
     // 图床类型选项
     private val sourceModeEntries by lazy { resources.getStringArray(R.array.source_mode_entries) }
     private val sourceModeValues by lazy { resources.getStringArray(R.array.source_mode_values) }
-
-    // 主题模式选项
-    private val themeModeEntries by lazy { resources.getStringArray(R.array.theme_mode_entries) }
-    private val themeModeValues by lazy { resources.getStringArray(R.array.theme_mode_values) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeHelper.apply(this)
@@ -70,11 +69,6 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun bindRows() {
-        // 主题模式
-        findViewById<View>(R.id.rowThemeMode).also {
-            it.setOnClickListener { showThemeModeDialog() }
-            FocusHelper.setupFocus(it)
-        }
         // 图床类型
         findViewById<View>(R.id.rowSourceMode).also {
             it.setOnClickListener { showSourceModeDialog() }
@@ -118,25 +112,13 @@ class SettingsActivity : AppCompatActivity() {
             it.setOnClickListener { openDreamSettings() }
             FocusHelper.setupFocus(it)
         }
-        // 检查更新
-        findViewById<View>(R.id.rowCheckUpdate).also {
-            it.setOnClickListener { checkUpdate() }
-            FocusHelper.setupFocus(it)
-        }
 
         // TV 进入设置页时，默认聚焦到第一个 row（让遥控器有起点）
-        FocusHelper.requestInitialFocus(findViewById(R.id.rowThemeMode))
+        FocusHelper.requestInitialFocus(findViewById(R.id.rowSourceMode))
     }
 
     /** 刷新所有行的显示状态。 */
     private fun refreshUi() {
-        // 主题模式
-        val tm = Prefs.themeMode(this)
-        val tmIdx = themeModeValues.indexOf(tm).coerceAtLeast(0)
-        val tmText = if (tmIdx in themeModeEntries.indices) themeModeEntries[tmIdx]
-            else themeModeEntries[0]
-        findViewById<android.widget.TextView>(R.id.tvThemeModeValue).text = tmText
-
         // 图床类型
         val mode = Prefs.sourceMode(this)
         val modeIdx = sourceModeValues.indexOf(mode).coerceAtLeast(0)
@@ -172,26 +154,6 @@ class SettingsActivity : AppCompatActivity() {
                     refreshUi()
                 }
                 dialog.dismiss()
-            }
-            .setNegativeButton(R.string.dialog_cancel, null)
-            .show()
-    }
-
-    /** 主题模式单选对话框。切换后立即重建 Activity 让背景生效。 */
-    private fun showThemeModeDialog() {
-        val cur = Prefs.themeMode(this)
-        val checked = themeModeValues.indexOf(cur).coerceAtLeast(0)
-        MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.dialog_theme_mode_title)
-            .setSingleChoiceItems(themeModeEntries, checked) { dialog, which ->
-                if (which in themeModeValues.indices) {
-                    val newMode = themeModeValues[which]
-                    Prefs.setThemeMode(this, newMode)
-                    dialog.dismiss()
-                    // 立即应用主题模式并重建 Activity，让背景纯黑/纯白立刻生效
-                    ThemeHelper.apply(this)
-                    recreate()
-                }
             }
             .setNegativeButton(R.string.dialog_cancel, null)
             .show()
@@ -262,64 +224,6 @@ class SettingsActivity : AppCompatActivity() {
         val ok = DreamSettingsHelper.openDreamSettings(this)
         if (!ok) {
             Toast.makeText(this, R.string.dream_settings_unavailable, Toast.LENGTH_LONG).show()
-        }
-    }
-
-    /** 检查 GitHub 最新 Release（含测试版）。 */
-    private fun checkUpdate() {
-        val tvTitle = findViewById<android.widget.TextView>(R.id.tvCheckUpdateTitle)
-        val tvSummary = findViewById<android.widget.TextView>(R.id.tvCheckUpdateSummary)
-        val originalTitle = tvTitle.text
-        val originalSummary = tvSummary.text
-
-        tvTitle.text = getString(R.string.pref_check_update_title)
-        tvSummary.text = getString(R.string.update_checking)
-
-        scope.launch {
-            val result = withContext(Dispatchers.IO) {
-                try {
-                    UpdateChecker.check(this@SettingsActivity)
-                } catch (t: Throwable) {
-                    null
-                }
-            }
-
-            tvTitle.text = originalTitle
-            tvSummary.text = originalSummary
-
-            if (result == null) {
-                Toast.makeText(this@SettingsActivity, getString(R.string.update_error, "网络异常"), Toast.LENGTH_LONG).show()
-                return@launch
-            }
-
-            if (!result.hasUpdate) {
-                Toast.makeText(
-                    this@SettingsActivity,
-                    getString(R.string.update_latest),
-                    Toast.LENGTH_SHORT
-                ).show()
-                return@launch
-            }
-
-            val prereleaseTag = if (result.isPrerelease) " · ${getString(R.string.update_prerelease)}" else ""
-            val message = getString(
-                R.string.update_dialog_message,
-                result.currentVersion,
-                result.latestVersion,
-                prereleaseTag
-            )
-            MaterialAlertDialogBuilder(this@SettingsActivity)
-                .setTitle(R.string.update_dialog_title)
-                .setMessage(message)
-                .setPositiveButton(R.string.update_dialog_download) { _, _ ->
-                    try {
-                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(result.downloadUrl)))
-                    } catch (_: Throwable) {
-                        Toast.makeText(this@SettingsActivity, "无法打开浏览器", Toast.LENGTH_SHORT).show()
-                    }
-                }
-                .setNegativeButton(R.string.update_dialog_later, null)
-                .show()
         }
     }
 

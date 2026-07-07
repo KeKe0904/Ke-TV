@@ -3,6 +3,8 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- 用于 in-app 更新：让 APP 能触发系统安装器安装下载好的 APK -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <!-- TV 可选：让 APP 同时能装到 TV 和手机上 -->
     <uses-feature android:name="android.software.leanback" android:required="false" />
@@ -37,10 +39,26 @@
             android:parentActivityName=".MainActivity" />
 
         <activity
+            android:name=".AppSettingsActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+
+        <activity
             android:name=".PhonePreviewActivity"
             android:exported="false"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:theme="@style/Theme.TVToolbox.Fullscreen" />
+
+        <!-- FileProvider：用于把 in-app 下载的 APK 安全地分享给系统安装器 -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
         <service
             android:name=".PhotoDreamService"

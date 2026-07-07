@@ -66,8 +66,10 @@ class MainActivity : AppCompatActivity() {
             ).show()
         }
 
-        // 5. 检查更新
-        findViewById<View>(R.id.cardUpdate).setOnClickListener { checkUpdate() }
+        // 5. 软件设置（主题 + 软件更新）
+        findViewById<View>(R.id.cardUpdate).setOnClickListener {
+            startActivity(Intent(this, AppSettingsActivity::class.java))
+        }
 
         // 6. 关于：打开 GitHub 项目主页
         findViewById<View>(R.id.cardAbout).setOnClickListener {
@@ -151,55 +153,6 @@ class MainActivity : AppCompatActivity() {
                     DreamSettingsHelper.triggerScreensaverNow(this)
                 }
                 .setNegativeButton(R.string.dialog_cancel, null)
-                .show()
-        }
-    }
-
-    /** 检查 GitHub 最新 Release（含测试版）。 */
-    private fun checkUpdate() {
-        Toast.makeText(this, R.string.update_checking, Toast.LENGTH_SHORT).show()
-
-        scope.launch {
-            val result = withContext(Dispatchers.IO) {
-                try {
-                    UpdateChecker.check(this@MainActivity)
-                } catch (t: Throwable) {
-                    null
-                }
-            }
-
-            if (result == null) {
-                Toast.makeText(
-                    this@MainActivity,
-                    getString(R.string.update_error, "网络异常"),
-                    Toast.LENGTH_LONG
-                ).show()
-                return@launch
-            }
-
-            if (!result.hasUpdate) {
-                Toast.makeText(this@MainActivity, R.string.update_latest, Toast.LENGTH_SHORT).show()
-                return@launch
-            }
-
-            val prereleaseTag = if (result.isPrerelease) " · ${getString(R.string.update_prerelease)}" else ""
-            val message = getString(
-                R.string.update_dialog_message,
-                result.currentVersion,
-                result.latestVersion,
-                prereleaseTag
-            )
-            androidx.appcompat.app.AlertDialog.Builder(this@MainActivity)
-                .setTitle(R.string.update_dialog_title)
-                .setMessage(message)
-                .setPositiveButton(R.string.update_dialog_download) { _, _ ->
-                    try {
-                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(result.downloadUrl)))
-                    } catch (_: Throwable) {
-                        Toast.makeText(this@MainActivity, "无法打开浏览器", Toast.LENGTH_SHORT).show()
-                    }
-                }
-                .setNegativeButton(R.string.update_dialog_later, null)
                 .show()
         }
     }

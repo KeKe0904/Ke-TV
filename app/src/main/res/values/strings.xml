@@ -38,17 +38,33 @@
     <string name="pref_open_dream_settings_title">打开系统屏保设置</string>
     <string name="pref_open_dream_settings_summary">在这里选择本 APP 作为系统屏保</string>
 
-    <string name="pref_check_update_title">检查更新</string>
-    <string name="pref_check_update_summary">从 GitHub 获取最新版本（含测试版）</string>
+    <string name="pref_check_update_title">软件更新</string>
+    <string name="pref_check_update_summary">检查并下载最新版本 APK</string>
     <string name="update_checking">正在检查更新…</string>
     <string name="update_latest">当前已是最新版本</string>
     <string name="update_available">发现新版本 %1$s</string>
     <string name="update_prerelease">测试版本</string>
     <string name="update_dialog_title">发现新版本</string>
-    <string name="update_dialog_message">当前版本：%1$s\n最新版本：%2$s%3$s\n\n是否前往下载？</string>
-    <string name="update_dialog_download">下载</string>
+    <string name="update_dialog_message">当前版本：%1$s\n最新版本：%2$s%3$s\n\n是否立即下载并安装？</string>
+    <string name="update_dialog_download">下载并安装</string>
     <string name="update_dialog_later">稍后</string>
     <string name="update_error">检查更新失败：%1$s</string>
+
+    <!-- 软件更新流程 -->
+    <string name="update_downloading_title">正在下载更新</string>
+    <string name="update_downloading_message">已下载 %1$d%% · %2$s / %3$s</string>
+    <string name="update_downloading_indeterminate">正在连接服务器…</string>
+    <string name="update_download_complete">下载完成，正在启动安装…</string>
+    <string name="update_download_failed">下载失败：%1$s</string>
+    <string name="update_install_failed">无法启动安装器，请到下载目录手动安装</string>
+    <string name="update_no_assets">新版本未提供 APK 安装包，无法下载</string>
+    <string name="update_download_canceled">下载已取消</string>
+
+    <!-- 软件设置 -->
+    <string name="app_settings_title">软件设置</string>
+    <string name="card_app_settings_title">软件设置</string>
+    <string name="card_app_settings_desc">主题 · 更新</string>
+    <string name="cat_app_settings">软件</string>
 
     <string name="settings_title">屏保设置</string>
     <string name="test_running">正在测试…</string>
@@ -78,8 +94,6 @@
     <string name="card_dream_settings_desc">选择本 APP 为系统屏保</string>
     <string name="card_browser_title">浏览器</string>
     <string name="card_browser_desc">敬请期待</string>
-    <string name="card_update_title">检查更新</string>
-    <string name="card_update_desc">获取最新版本</string>
     <string name="card_about_title">关于</string>
     <string name="card_about_desc">项目主页 · 版本信息</string>
     <string name="card_status_title">图床状态</string>
