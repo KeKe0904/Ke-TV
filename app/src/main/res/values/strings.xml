@@ -131,7 +131,7 @@
     <string name="browser_home">主页</string>
     <string name="browser_search_hint">搜索或输入网址</string>
     <string name="browser_go">前往</string>
-    <string name="browser_homepage">https://www.baidu.com</string>
+    <string name="browser_homepage">https://www.bing.com</string>
     <string name="browser_loading">加载中…</string>
     <string name="browser_error_title">无法加载页面</string>
     <string name="browser_error_message">页面加载失败：%1$s</string>

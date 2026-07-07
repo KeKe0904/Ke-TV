@@ -49,7 +49,7 @@ class BrowserActivity : AppCompatActivity() {
     /** 当前是否正在加载。true 时刷新按钮显示为停止。 */
     private var isLoading = false
 
-    /** 默认主页：百度搜索首页（兼顾国内可用性）。 */
+    /** 默认主页：必应搜索首页。 */
     private val homeUrl: String
         get() = getString(R.string.browser_homepage)
 
